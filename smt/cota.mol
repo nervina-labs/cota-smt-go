@@ -64,7 +64,8 @@ vector DefineCotaNFTValueVec <DefineCotaNFTValue>;
 
 table DefineCotaNFTEntries {
   defineKeys: DefineCotaNFTKeyVec,
-  defineValues: DefineCotaNFTValueVec,
+  defineOldValues: DefineCotaNFTValueVec,
+  defineNewValues: DefineCotaNFTValueVec,
   holdKeys: HoldCotaNFTKeyVec,
   holdValues: HoldCotaNFTValueVec,
   proof: Bytes,
