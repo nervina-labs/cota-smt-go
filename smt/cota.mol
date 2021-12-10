@@ -25,12 +25,6 @@ vector HoldCotaNFTKeyVec <CotaNFTId>;
 
 vector HoldCotaNFTValueVec <CotaNFTInfo>;
 
-table HoldCotaNFTEntries {
-  keys: HoldCotaNFTKeyVec,
-  values: HoldCotaNFTValueVec,
-  proof: Bytes,
-}
-
 
 // registry
 struct Registry {
@@ -46,7 +40,7 @@ table CotaNFTRegistryEntries {
 }
 
 
-//define
+// define
 struct DefineCotaNFTId {
   smtType: Uint16,
   cotaId: CotaId,
@@ -64,10 +58,19 @@ vector DefineCotaNFTValueVec <DefineCotaNFTValue>;
 
 table DefineCotaNFTEntries {
   defineKeys: DefineCotaNFTKeyVec,
+  defineValues: DefineCotaNFTValueVec,
+  proof: Bytes,
+  action: Bytes,
+}
+
+
+// mint
+table MintCotaNFTEntries {
+  defineKeys: DefineCotaNFTKeyVec,
   defineOldValues: DefineCotaNFTValueVec,
   defineNewValues: DefineCotaNFTValueVec,
-  holdKeys: HoldCotaNFTKeyVec,
-  holdValues: HoldCotaNFTValueVec,
+  withdrawalKeys: WithdrawalCotaNFTKeyVec,
+  withdrawalValues: WithdrawalCotaNFTValueVec,
   proof: Bytes,
   action: Bytes,
 }
@@ -116,9 +119,9 @@ table ClaimCotaNFTEntries {
 
 // update
 table UpdateCotaNFTEntries {
-  keys: HoldCotaNFTKeyVec,
-  oldValues: HoldCotaNFTValueVec,
-  newValues: HoldCotaNFTValueVec,
+  holdKeys: HoldCotaNFTKeyVec,
+  holdOldValues: HoldCotaNFTValueVec,
+  holdNewValues: HoldCotaNFTValueVec,
   proof: Bytes,
   action: Bytes,
 }

@@ -2267,198 +2267,6 @@ func (s *HoldCotaNFTValueVec) AsBuilder() HoldCotaNFTValueVecBuilder {
 	return *t
 }
 
-type HoldCotaNFTEntriesBuilder struct {
-	keys   HoldCotaNFTKeyVec
-	values HoldCotaNFTValueVec
-	proof  Bytes
-}
-
-func (s *HoldCotaNFTEntriesBuilder) Build() HoldCotaNFTEntries {
-	b := new(bytes.Buffer)
-
-	totalSize := HeaderSizeUint * (3 + 1)
-	offsets := make([]uint32, 0, 3)
-
-	offsets = append(offsets, totalSize)
-	totalSize += uint32(len(s.keys.AsSlice()))
-	offsets = append(offsets, totalSize)
-	totalSize += uint32(len(s.values.AsSlice()))
-	offsets = append(offsets, totalSize)
-	totalSize += uint32(len(s.proof.AsSlice()))
-
-	b.Write(packNumber(Number(totalSize)))
-
-	for i := 0; i < len(offsets); i++ {
-		b.Write(packNumber(Number(offsets[i])))
-	}
-
-	b.Write(s.keys.AsSlice())
-	b.Write(s.values.AsSlice())
-	b.Write(s.proof.AsSlice())
-	return HoldCotaNFTEntries{inner: b.Bytes()}
-}
-
-func (s *HoldCotaNFTEntriesBuilder) Keys(v HoldCotaNFTKeyVec) *HoldCotaNFTEntriesBuilder {
-	s.keys = v
-	return s
-}
-
-func (s *HoldCotaNFTEntriesBuilder) Values(v HoldCotaNFTValueVec) *HoldCotaNFTEntriesBuilder {
-	s.values = v
-	return s
-}
-
-func (s *HoldCotaNFTEntriesBuilder) Proof(v Bytes) *HoldCotaNFTEntriesBuilder {
-	s.proof = v
-	return s
-}
-
-func NewHoldCotaNFTEntriesBuilder() *HoldCotaNFTEntriesBuilder {
-	return &HoldCotaNFTEntriesBuilder{keys: HoldCotaNFTKeyVecDefault(), values: HoldCotaNFTValueVecDefault(), proof: BytesDefault()}
-}
-
-type HoldCotaNFTEntries struct {
-	inner []byte
-}
-
-func HoldCotaNFTEntriesFromSliceUnchecked(slice []byte) *HoldCotaNFTEntries {
-	return &HoldCotaNFTEntries{inner: slice}
-}
-func (s *HoldCotaNFTEntries) AsSlice() []byte {
-	return s.inner
-}
-
-func HoldCotaNFTEntriesDefault() HoldCotaNFTEntries {
-	return *HoldCotaNFTEntriesFromSliceUnchecked([]byte{28, 0, 0, 0, 16, 0, 0, 0, 20, 0, 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
-}
-
-func HoldCotaNFTEntriesFromSlice(slice []byte, compatible bool) (*HoldCotaNFTEntries, error) {
-	sliceLen := len(slice)
-	if uint32(sliceLen) < HeaderSizeUint {
-		errMsg := strings.Join([]string{"HeaderIsBroken", "HoldCotaNFTEntries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint))}, " ")
-		return nil, errors.New(errMsg)
-	}
-
-	totalSize := unpackNumber(slice)
-	if Number(sliceLen) != totalSize {
-		errMsg := strings.Join([]string{"TotalSizeNotMatch", "HoldCotaNFTEntries", strconv.Itoa(int(sliceLen)), "!=", strconv.Itoa(int(totalSize))}, " ")
-		return nil, errors.New(errMsg)
-	}
-
-	if uint32(sliceLen) == HeaderSizeUint && 3 == 0 {
-		return &HoldCotaNFTEntries{inner: slice}, nil
-	}
-
-	if uint32(sliceLen) < HeaderSizeUint*2 {
-		errMsg := strings.Join([]string{"TotalSizeNotMatch", "HoldCotaNFTEntries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
-		return nil, errors.New(errMsg)
-	}
-
-	offsetFirst := unpackNumber(slice[HeaderSizeUint:])
-	if uint32(offsetFirst)%HeaderSizeUint != 0 || uint32(offsetFirst) < HeaderSizeUint*2 {
-		errMsg := strings.Join([]string{"OffsetsNotMatch", "HoldCotaNFTEntries", strconv.Itoa(int(offsetFirst % 4)), "!= 0", strconv.Itoa(int(offsetFirst)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
-		return nil, errors.New(errMsg)
-	}
-
-	if sliceLen < int(offsetFirst) {
-		errMsg := strings.Join([]string{"HeaderIsBroken", "HoldCotaNFTEntries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(offsetFirst))}, " ")
-		return nil, errors.New(errMsg)
-	}
-
-	fieldCount := uint32(offsetFirst)/HeaderSizeUint - 1
-	if fieldCount < 3 {
-		return nil, errors.New("FieldCountNotMatch")
-	} else if !compatible && fieldCount > 3 {
-		return nil, errors.New("FieldCountNotMatch")
-	}
-
-	offsets := make([]uint32, fieldCount)
-
-	for i := 0; i < int(fieldCount); i++ {
-		offsets[i] = uint32(unpackNumber(slice[HeaderSizeUint:][int(HeaderSizeUint)*i:]))
-	}
-	offsets = append(offsets, uint32(totalSize))
-
-	for i := 0; i < len(offsets); i++ {
-		if i&1 != 0 && offsets[i-1] > offsets[i] {
-			return nil, errors.New("OffsetsNotMatch")
-		}
-	}
-
-	var err error
-
-	_, err = HoldCotaNFTKeyVecFromSlice(slice[offsets[0]:offsets[1]], compatible)
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = HoldCotaNFTValueVecFromSlice(slice[offsets[1]:offsets[2]], compatible)
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = BytesFromSlice(slice[offsets[2]:offsets[3]], compatible)
-	if err != nil {
-		return nil, err
-	}
-
-	return &HoldCotaNFTEntries{inner: slice}, nil
-}
-
-func (s *HoldCotaNFTEntries) TotalSize() uint {
-	return uint(unpackNumber(s.inner))
-}
-func (s *HoldCotaNFTEntries) FieldCount() uint {
-	var number uint = 0
-	if uint32(s.TotalSize()) == HeaderSizeUint {
-		return number
-	}
-	number = uint(unpackNumber(s.inner[HeaderSizeUint:]))/4 - 1
-	return number
-}
-func (s *HoldCotaNFTEntries) Len() uint {
-	return s.FieldCount()
-}
-func (s *HoldCotaNFTEntries) IsEmpty() bool {
-	return s.Len() == 0
-}
-func (s *HoldCotaNFTEntries) CountExtraFields() uint {
-	return s.FieldCount() - 3
-}
-
-func (s *HoldCotaNFTEntries) HasExtraFields() bool {
-	return 3 != s.FieldCount()
-}
-
-func (s *HoldCotaNFTEntries) Keys() *HoldCotaNFTKeyVec {
-	start := unpackNumber(s.inner[4:])
-	end := unpackNumber(s.inner[8:])
-	return HoldCotaNFTKeyVecFromSliceUnchecked(s.inner[start:end])
-}
-
-func (s *HoldCotaNFTEntries) Values() *HoldCotaNFTValueVec {
-	start := unpackNumber(s.inner[8:])
-	end := unpackNumber(s.inner[12:])
-	return HoldCotaNFTValueVecFromSliceUnchecked(s.inner[start:end])
-}
-
-func (s *HoldCotaNFTEntries) Proof() *Bytes {
-	var ret *Bytes
-	start := unpackNumber(s.inner[12:])
-	if s.HasExtraFields() {
-		end := unpackNumber(s.inner[16:])
-		ret = BytesFromSliceUnchecked(s.inner[start:end])
-	} else {
-		ret = BytesFromSliceUnchecked(s.inner[start:])
-	}
-	return ret
-}
-
-func (s *HoldCotaNFTEntries) AsBuilder() HoldCotaNFTEntriesBuilder {
-	ret := NewHoldCotaNFTEntriesBuilder().Keys(*s.Keys()).Values(*s.Values()).Proof(*s.Proof())
-	return *ret
-}
-
 type RegistryBuilder struct {
 	lockHash Byte32
 	state    Byte32
@@ -3358,8 +3166,6 @@ func (s *DefineCotaNFTValueVec) AsBuilder() DefineCotaNFTValueVecBuilder {
 type DefineCotaNFTEntriesBuilder struct {
 	defineKeys   DefineCotaNFTKeyVec
 	defineValues DefineCotaNFTValueVec
-	holdKeys     HoldCotaNFTKeyVec
-	holdValues   HoldCotaNFTValueVec
 	proof        Bytes
 	action       Bytes
 }
@@ -3367,17 +3173,13 @@ type DefineCotaNFTEntriesBuilder struct {
 func (s *DefineCotaNFTEntriesBuilder) Build() DefineCotaNFTEntries {
 	b := new(bytes.Buffer)
 
-	totalSize := HeaderSizeUint * (6 + 1)
-	offsets := make([]uint32, 0, 6)
+	totalSize := HeaderSizeUint * (4 + 1)
+	offsets := make([]uint32, 0, 4)
 
 	offsets = append(offsets, totalSize)
 	totalSize += uint32(len(s.defineKeys.AsSlice()))
 	offsets = append(offsets, totalSize)
 	totalSize += uint32(len(s.defineValues.AsSlice()))
-	offsets = append(offsets, totalSize)
-	totalSize += uint32(len(s.holdKeys.AsSlice()))
-	offsets = append(offsets, totalSize)
-	totalSize += uint32(len(s.holdValues.AsSlice()))
 	offsets = append(offsets, totalSize)
 	totalSize += uint32(len(s.proof.AsSlice()))
 	offsets = append(offsets, totalSize)
@@ -3391,8 +3193,6 @@ func (s *DefineCotaNFTEntriesBuilder) Build() DefineCotaNFTEntries {
 
 	b.Write(s.defineKeys.AsSlice())
 	b.Write(s.defineValues.AsSlice())
-	b.Write(s.holdKeys.AsSlice())
-	b.Write(s.holdValues.AsSlice())
 	b.Write(s.proof.AsSlice())
 	b.Write(s.action.AsSlice())
 	return DefineCotaNFTEntries{inner: b.Bytes()}
@@ -3408,16 +3208,6 @@ func (s *DefineCotaNFTEntriesBuilder) DefineValues(v DefineCotaNFTValueVec) *Def
 	return s
 }
 
-func (s *DefineCotaNFTEntriesBuilder) HoldKeys(v HoldCotaNFTKeyVec) *DefineCotaNFTEntriesBuilder {
-	s.holdKeys = v
-	return s
-}
-
-func (s *DefineCotaNFTEntriesBuilder) HoldValues(v HoldCotaNFTValueVec) *DefineCotaNFTEntriesBuilder {
-	s.holdValues = v
-	return s
-}
-
 func (s *DefineCotaNFTEntriesBuilder) Proof(v Bytes) *DefineCotaNFTEntriesBuilder {
 	s.proof = v
 	return s
@@ -3429,7 +3219,7 @@ func (s *DefineCotaNFTEntriesBuilder) Action(v Bytes) *DefineCotaNFTEntriesBuild
 }
 
 func NewDefineCotaNFTEntriesBuilder() *DefineCotaNFTEntriesBuilder {
-	return &DefineCotaNFTEntriesBuilder{defineKeys: DefineCotaNFTKeyVecDefault(), defineValues: DefineCotaNFTValueVecDefault(), holdKeys: HoldCotaNFTKeyVecDefault(), holdValues: HoldCotaNFTValueVecDefault(), proof: BytesDefault(), action: BytesDefault()}
+	return &DefineCotaNFTEntriesBuilder{defineKeys: DefineCotaNFTKeyVecDefault(), defineValues: DefineCotaNFTValueVecDefault(), proof: BytesDefault(), action: BytesDefault()}
 }
 
 type DefineCotaNFTEntries struct {
@@ -3444,7 +3234,7 @@ func (s *DefineCotaNFTEntries) AsSlice() []byte {
 }
 
 func DefineCotaNFTEntriesDefault() DefineCotaNFTEntries {
-	return *DefineCotaNFTEntriesFromSliceUnchecked([]byte{52, 0, 0, 0, 28, 0, 0, 0, 32, 0, 0, 0, 36, 0, 0, 0, 40, 0, 0, 0, 44, 0, 0, 0, 48, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
+	return *DefineCotaNFTEntriesFromSliceUnchecked([]byte{36, 0, 0, 0, 20, 0, 0, 0, 24, 0, 0, 0, 28, 0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
 }
 
 func DefineCotaNFTEntriesFromSlice(slice []byte, compatible bool) (*DefineCotaNFTEntries, error) {
@@ -3460,7 +3250,7 @@ func DefineCotaNFTEntriesFromSlice(slice []byte, compatible bool) (*DefineCotaNF
 		return nil, errors.New(errMsg)
 	}
 
-	if uint32(sliceLen) == HeaderSizeUint && 6 == 0 {
+	if uint32(sliceLen) == HeaderSizeUint && 4 == 0 {
 		return &DefineCotaNFTEntries{inner: slice}, nil
 	}
 
@@ -3481,9 +3271,9 @@ func DefineCotaNFTEntriesFromSlice(slice []byte, compatible bool) (*DefineCotaNF
 	}
 
 	fieldCount := uint32(offsetFirst)/HeaderSizeUint - 1
-	if fieldCount < 6 {
+	if fieldCount < 4 {
 		return nil, errors.New("FieldCountNotMatch")
-	} else if !compatible && fieldCount > 6 {
+	} else if !compatible && fieldCount > 4 {
 		return nil, errors.New("FieldCountNotMatch")
 	}
 
@@ -3512,22 +3302,12 @@ func DefineCotaNFTEntriesFromSlice(slice []byte, compatible bool) (*DefineCotaNF
 		return nil, err
 	}
 
-	_, err = HoldCotaNFTKeyVecFromSlice(slice[offsets[2]:offsets[3]], compatible)
+	_, err = BytesFromSlice(slice[offsets[2]:offsets[3]], compatible)
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = HoldCotaNFTValueVecFromSlice(slice[offsets[3]:offsets[4]], compatible)
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = BytesFromSlice(slice[offsets[4]:offsets[5]], compatible)
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = BytesFromSlice(slice[offsets[5]:offsets[6]], compatible)
+	_, err = BytesFromSlice(slice[offsets[3]:offsets[4]], compatible)
 	if err != nil {
 		return nil, err
 	}
@@ -3553,11 +3333,11 @@ func (s *DefineCotaNFTEntries) IsEmpty() bool {
 	return s.Len() == 0
 }
 func (s *DefineCotaNFTEntries) CountExtraFields() uint {
-	return s.FieldCount() - 6
+	return s.FieldCount() - 4
 }
 
 func (s *DefineCotaNFTEntries) HasExtraFields() bool {
-	return 6 != s.FieldCount()
+	return 4 != s.FieldCount()
 }
 
 func (s *DefineCotaNFTEntries) DefineKeys() *DefineCotaNFTKeyVec {
@@ -3572,29 +3352,17 @@ func (s *DefineCotaNFTEntries) DefineValues() *DefineCotaNFTValueVec {
 	return DefineCotaNFTValueVecFromSliceUnchecked(s.inner[start:end])
 }
 
-func (s *DefineCotaNFTEntries) HoldKeys() *HoldCotaNFTKeyVec {
+func (s *DefineCotaNFTEntries) Proof() *Bytes {
 	start := unpackNumber(s.inner[12:])
 	end := unpackNumber(s.inner[16:])
-	return HoldCotaNFTKeyVecFromSliceUnchecked(s.inner[start:end])
-}
-
-func (s *DefineCotaNFTEntries) HoldValues() *HoldCotaNFTValueVec {
-	start := unpackNumber(s.inner[16:])
-	end := unpackNumber(s.inner[20:])
-	return HoldCotaNFTValueVecFromSliceUnchecked(s.inner[start:end])
-}
-
-func (s *DefineCotaNFTEntries) Proof() *Bytes {
-	start := unpackNumber(s.inner[20:])
-	end := unpackNumber(s.inner[24:])
 	return BytesFromSliceUnchecked(s.inner[start:end])
 }
 
 func (s *DefineCotaNFTEntries) Action() *Bytes {
 	var ret *Bytes
-	start := unpackNumber(s.inner[24:])
+	start := unpackNumber(s.inner[16:])
 	if s.HasExtraFields() {
-		end := unpackNumber(s.inner[28:])
+		end := unpackNumber(s.inner[20:])
 		ret = BytesFromSliceUnchecked(s.inner[start:end])
 	} else {
 		ret = BytesFromSliceUnchecked(s.inner[start:])
@@ -3603,7 +3371,279 @@ func (s *DefineCotaNFTEntries) Action() *Bytes {
 }
 
 func (s *DefineCotaNFTEntries) AsBuilder() DefineCotaNFTEntriesBuilder {
-	ret := NewDefineCotaNFTEntriesBuilder().DefineKeys(*s.DefineKeys()).DefineValues(*s.DefineValues()).HoldKeys(*s.HoldKeys()).HoldValues(*s.HoldValues()).Proof(*s.Proof()).Action(*s.Action())
+	ret := NewDefineCotaNFTEntriesBuilder().DefineKeys(*s.DefineKeys()).DefineValues(*s.DefineValues()).Proof(*s.Proof()).Action(*s.Action())
+	return *ret
+}
+
+type MintCotaNFTEntriesBuilder struct {
+	defineKeys       DefineCotaNFTKeyVec
+	defineOldValues  DefineCotaNFTValueVec
+	defineNewValues  DefineCotaNFTValueVec
+	withdrawalKeys   WithdrawalCotaNFTKeyVec
+	withdrawalValues WithdrawalCotaNFTValueVec
+	proof            Bytes
+	action           Bytes
+}
+
+func (s *MintCotaNFTEntriesBuilder) Build() MintCotaNFTEntries {
+	b := new(bytes.Buffer)
+
+	totalSize := HeaderSizeUint * (7 + 1)
+	offsets := make([]uint32, 0, 7)
+
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.defineKeys.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.defineOldValues.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.defineNewValues.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.withdrawalKeys.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.withdrawalValues.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.proof.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.action.AsSlice()))
+
+	b.Write(packNumber(Number(totalSize)))
+
+	for i := 0; i < len(offsets); i++ {
+		b.Write(packNumber(Number(offsets[i])))
+	}
+
+	b.Write(s.defineKeys.AsSlice())
+	b.Write(s.defineOldValues.AsSlice())
+	b.Write(s.defineNewValues.AsSlice())
+	b.Write(s.withdrawalKeys.AsSlice())
+	b.Write(s.withdrawalValues.AsSlice())
+	b.Write(s.proof.AsSlice())
+	b.Write(s.action.AsSlice())
+	return MintCotaNFTEntries{inner: b.Bytes()}
+}
+
+func (s *MintCotaNFTEntriesBuilder) DefineKeys(v DefineCotaNFTKeyVec) *MintCotaNFTEntriesBuilder {
+	s.defineKeys = v
+	return s
+}
+
+func (s *MintCotaNFTEntriesBuilder) DefineOldValues(v DefineCotaNFTValueVec) *MintCotaNFTEntriesBuilder {
+	s.defineOldValues = v
+	return s
+}
+
+func (s *MintCotaNFTEntriesBuilder) DefineNewValues(v DefineCotaNFTValueVec) *MintCotaNFTEntriesBuilder {
+	s.defineNewValues = v
+	return s
+}
+
+func (s *MintCotaNFTEntriesBuilder) WithdrawalKeys(v WithdrawalCotaNFTKeyVec) *MintCotaNFTEntriesBuilder {
+	s.withdrawalKeys = v
+	return s
+}
+
+func (s *MintCotaNFTEntriesBuilder) WithdrawalValues(v WithdrawalCotaNFTValueVec) *MintCotaNFTEntriesBuilder {
+	s.withdrawalValues = v
+	return s
+}
+
+func (s *MintCotaNFTEntriesBuilder) Proof(v Bytes) *MintCotaNFTEntriesBuilder {
+	s.proof = v
+	return s
+}
+
+func (s *MintCotaNFTEntriesBuilder) Action(v Bytes) *MintCotaNFTEntriesBuilder {
+	s.action = v
+	return s
+}
+
+func NewMintCotaNFTEntriesBuilder() *MintCotaNFTEntriesBuilder {
+	return &MintCotaNFTEntriesBuilder{defineKeys: DefineCotaNFTKeyVecDefault(), defineOldValues: DefineCotaNFTValueVecDefault(), defineNewValues: DefineCotaNFTValueVecDefault(), withdrawalKeys: WithdrawalCotaNFTKeyVecDefault(), withdrawalValues: WithdrawalCotaNFTValueVecDefault(), proof: BytesDefault(), action: BytesDefault()}
+}
+
+type MintCotaNFTEntries struct {
+	inner []byte
+}
+
+func MintCotaNFTEntriesFromSliceUnchecked(slice []byte) *MintCotaNFTEntries {
+	return &MintCotaNFTEntries{inner: slice}
+}
+func (s *MintCotaNFTEntries) AsSlice() []byte {
+	return s.inner
+}
+
+func MintCotaNFTEntriesDefault() MintCotaNFTEntries {
+	return *MintCotaNFTEntriesFromSliceUnchecked([]byte{60, 0, 0, 0, 32, 0, 0, 0, 36, 0, 0, 0, 40, 0, 0, 0, 44, 0, 0, 0, 48, 0, 0, 0, 52, 0, 0, 0, 56, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
+}
+
+func MintCotaNFTEntriesFromSlice(slice []byte, compatible bool) (*MintCotaNFTEntries, error) {
+	sliceLen := len(slice)
+	if uint32(sliceLen) < HeaderSizeUint {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "MintCotaNFTEntries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	totalSize := unpackNumber(slice)
+	if Number(sliceLen) != totalSize {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "MintCotaNFTEntries", strconv.Itoa(int(sliceLen)), "!=", strconv.Itoa(int(totalSize))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if uint32(sliceLen) == HeaderSizeUint && 7 == 0 {
+		return &MintCotaNFTEntries{inner: slice}, nil
+	}
+
+	if uint32(sliceLen) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "MintCotaNFTEntries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	offsetFirst := unpackNumber(slice[HeaderSizeUint:])
+	if uint32(offsetFirst)%HeaderSizeUint != 0 || uint32(offsetFirst) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"OffsetsNotMatch", "MintCotaNFTEntries", strconv.Itoa(int(offsetFirst % 4)), "!= 0", strconv.Itoa(int(offsetFirst)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if sliceLen < int(offsetFirst) {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "MintCotaNFTEntries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(offsetFirst))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	fieldCount := uint32(offsetFirst)/HeaderSizeUint - 1
+	if fieldCount < 7 {
+		return nil, errors.New("FieldCountNotMatch")
+	} else if !compatible && fieldCount > 7 {
+		return nil, errors.New("FieldCountNotMatch")
+	}
+
+	offsets := make([]uint32, fieldCount)
+
+	for i := 0; i < int(fieldCount); i++ {
+		offsets[i] = uint32(unpackNumber(slice[HeaderSizeUint:][int(HeaderSizeUint)*i:]))
+	}
+	offsets = append(offsets, uint32(totalSize))
+
+	for i := 0; i < len(offsets); i++ {
+		if i&1 != 0 && offsets[i-1] > offsets[i] {
+			return nil, errors.New("OffsetsNotMatch")
+		}
+	}
+
+	var err error
+
+	_, err = DefineCotaNFTKeyVecFromSlice(slice[offsets[0]:offsets[1]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = DefineCotaNFTValueVecFromSlice(slice[offsets[1]:offsets[2]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = DefineCotaNFTValueVecFromSlice(slice[offsets[2]:offsets[3]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = WithdrawalCotaNFTKeyVecFromSlice(slice[offsets[3]:offsets[4]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = WithdrawalCotaNFTValueVecFromSlice(slice[offsets[4]:offsets[5]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[5]:offsets[6]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[6]:offsets[7]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	return &MintCotaNFTEntries{inner: slice}, nil
+}
+
+func (s *MintCotaNFTEntries) TotalSize() uint {
+	return uint(unpackNumber(s.inner))
+}
+func (s *MintCotaNFTEntries) FieldCount() uint {
+	var number uint = 0
+	if uint32(s.TotalSize()) == HeaderSizeUint {
+		return number
+	}
+	number = uint(unpackNumber(s.inner[HeaderSizeUint:]))/4 - 1
+	return number
+}
+func (s *MintCotaNFTEntries) Len() uint {
+	return s.FieldCount()
+}
+func (s *MintCotaNFTEntries) IsEmpty() bool {
+	return s.Len() == 0
+}
+func (s *MintCotaNFTEntries) CountExtraFields() uint {
+	return s.FieldCount() - 7
+}
+
+func (s *MintCotaNFTEntries) HasExtraFields() bool {
+	return 7 != s.FieldCount()
+}
+
+func (s *MintCotaNFTEntries) DefineKeys() *DefineCotaNFTKeyVec {
+	start := unpackNumber(s.inner[4:])
+	end := unpackNumber(s.inner[8:])
+	return DefineCotaNFTKeyVecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *MintCotaNFTEntries) DefineOldValues() *DefineCotaNFTValueVec {
+	start := unpackNumber(s.inner[8:])
+	end := unpackNumber(s.inner[12:])
+	return DefineCotaNFTValueVecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *MintCotaNFTEntries) DefineNewValues() *DefineCotaNFTValueVec {
+	start := unpackNumber(s.inner[12:])
+	end := unpackNumber(s.inner[16:])
+	return DefineCotaNFTValueVecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *MintCotaNFTEntries) WithdrawalKeys() *WithdrawalCotaNFTKeyVec {
+	start := unpackNumber(s.inner[16:])
+	end := unpackNumber(s.inner[20:])
+	return WithdrawalCotaNFTKeyVecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *MintCotaNFTEntries) WithdrawalValues() *WithdrawalCotaNFTValueVec {
+	start := unpackNumber(s.inner[20:])
+	end := unpackNumber(s.inner[24:])
+	return WithdrawalCotaNFTValueVecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *MintCotaNFTEntries) Proof() *Bytes {
+	start := unpackNumber(s.inner[24:])
+	end := unpackNumber(s.inner[28:])
+	return BytesFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *MintCotaNFTEntries) Action() *Bytes {
+	var ret *Bytes
+	start := unpackNumber(s.inner[28:])
+	if s.HasExtraFields() {
+		end := unpackNumber(s.inner[32:])
+		ret = BytesFromSliceUnchecked(s.inner[start:end])
+	} else {
+		ret = BytesFromSliceUnchecked(s.inner[start:])
+	}
+	return ret
+}
+
+func (s *MintCotaNFTEntries) AsBuilder() MintCotaNFTEntriesBuilder {
+	ret := NewMintCotaNFTEntriesBuilder().DefineKeys(*s.DefineKeys()).DefineOldValues(*s.DefineOldValues()).DefineNewValues(*s.DefineNewValues()).WithdrawalKeys(*s.WithdrawalKeys()).WithdrawalValues(*s.WithdrawalValues()).Proof(*s.Proof()).Action(*s.Action())
 	return *ret
 }
 
@@ -5080,11 +5120,11 @@ func (s *ClaimCotaNFTEntries) AsBuilder() ClaimCotaNFTEntriesBuilder {
 }
 
 type UpdateCotaNFTEntriesBuilder struct {
-	keys      HoldCotaNFTKeyVec
-	oldValues HoldCotaNFTValueVec
-	newValues HoldCotaNFTValueVec
-	proof     Bytes
-	action    Bytes
+	holdKeys      HoldCotaNFTKeyVec
+	holdOldValues HoldCotaNFTValueVec
+	holdNewValues HoldCotaNFTValueVec
+	proof         Bytes
+	action        Bytes
 }
 
 func (s *UpdateCotaNFTEntriesBuilder) Build() UpdateCotaNFTEntries {
@@ -5094,11 +5134,11 @@ func (s *UpdateCotaNFTEntriesBuilder) Build() UpdateCotaNFTEntries {
 	offsets := make([]uint32, 0, 5)
 
 	offsets = append(offsets, totalSize)
-	totalSize += uint32(len(s.keys.AsSlice()))
+	totalSize += uint32(len(s.holdKeys.AsSlice()))
 	offsets = append(offsets, totalSize)
-	totalSize += uint32(len(s.oldValues.AsSlice()))
+	totalSize += uint32(len(s.holdOldValues.AsSlice()))
 	offsets = append(offsets, totalSize)
-	totalSize += uint32(len(s.newValues.AsSlice()))
+	totalSize += uint32(len(s.holdNewValues.AsSlice()))
 	offsets = append(offsets, totalSize)
 	totalSize += uint32(len(s.proof.AsSlice()))
 	offsets = append(offsets, totalSize)
@@ -5110,26 +5150,26 @@ func (s *UpdateCotaNFTEntriesBuilder) Build() UpdateCotaNFTEntries {
 		b.Write(packNumber(Number(offsets[i])))
 	}
 
-	b.Write(s.keys.AsSlice())
-	b.Write(s.oldValues.AsSlice())
-	b.Write(s.newValues.AsSlice())
+	b.Write(s.holdKeys.AsSlice())
+	b.Write(s.holdOldValues.AsSlice())
+	b.Write(s.holdNewValues.AsSlice())
 	b.Write(s.proof.AsSlice())
 	b.Write(s.action.AsSlice())
 	return UpdateCotaNFTEntries{inner: b.Bytes()}
 }
 
-func (s *UpdateCotaNFTEntriesBuilder) Keys(v HoldCotaNFTKeyVec) *UpdateCotaNFTEntriesBuilder {
-	s.keys = v
+func (s *UpdateCotaNFTEntriesBuilder) HoldKeys(v HoldCotaNFTKeyVec) *UpdateCotaNFTEntriesBuilder {
+	s.holdKeys = v
 	return s
 }
 
-func (s *UpdateCotaNFTEntriesBuilder) OldValues(v HoldCotaNFTValueVec) *UpdateCotaNFTEntriesBuilder {
-	s.oldValues = v
+func (s *UpdateCotaNFTEntriesBuilder) HoldOldValues(v HoldCotaNFTValueVec) *UpdateCotaNFTEntriesBuilder {
+	s.holdOldValues = v
 	return s
 }
 
-func (s *UpdateCotaNFTEntriesBuilder) NewValues(v HoldCotaNFTValueVec) *UpdateCotaNFTEntriesBuilder {
-	s.newValues = v
+func (s *UpdateCotaNFTEntriesBuilder) HoldNewValues(v HoldCotaNFTValueVec) *UpdateCotaNFTEntriesBuilder {
+	s.holdNewValues = v
 	return s
 }
 
@@ -5144,7 +5184,7 @@ func (s *UpdateCotaNFTEntriesBuilder) Action(v Bytes) *UpdateCotaNFTEntriesBuild
 }
 
 func NewUpdateCotaNFTEntriesBuilder() *UpdateCotaNFTEntriesBuilder {
-	return &UpdateCotaNFTEntriesBuilder{keys: HoldCotaNFTKeyVecDefault(), oldValues: HoldCotaNFTValueVecDefault(), newValues: HoldCotaNFTValueVecDefault(), proof: BytesDefault(), action: BytesDefault()}
+	return &UpdateCotaNFTEntriesBuilder{holdKeys: HoldCotaNFTKeyVecDefault(), holdOldValues: HoldCotaNFTValueVecDefault(), holdNewValues: HoldCotaNFTValueVecDefault(), proof: BytesDefault(), action: BytesDefault()}
 }
 
 type UpdateCotaNFTEntries struct {
@@ -5270,19 +5310,19 @@ func (s *UpdateCotaNFTEntries) HasExtraFields() bool {
 	return 5 != s.FieldCount()
 }
 
-func (s *UpdateCotaNFTEntries) Keys() *HoldCotaNFTKeyVec {
+func (s *UpdateCotaNFTEntries) HoldKeys() *HoldCotaNFTKeyVec {
 	start := unpackNumber(s.inner[4:])
 	end := unpackNumber(s.inner[8:])
 	return HoldCotaNFTKeyVecFromSliceUnchecked(s.inner[start:end])
 }
 
-func (s *UpdateCotaNFTEntries) OldValues() *HoldCotaNFTValueVec {
+func (s *UpdateCotaNFTEntries) HoldOldValues() *HoldCotaNFTValueVec {
 	start := unpackNumber(s.inner[8:])
 	end := unpackNumber(s.inner[12:])
 	return HoldCotaNFTValueVecFromSliceUnchecked(s.inner[start:end])
 }
 
-func (s *UpdateCotaNFTEntries) NewValues() *HoldCotaNFTValueVec {
+func (s *UpdateCotaNFTEntries) HoldNewValues() *HoldCotaNFTValueVec {
 	start := unpackNumber(s.inner[12:])
 	end := unpackNumber(s.inner[16:])
 	return HoldCotaNFTValueVecFromSliceUnchecked(s.inner[start:end])
@@ -5307,6 +5347,6 @@ func (s *UpdateCotaNFTEntries) Action() *Bytes {
 }
 
 func (s *UpdateCotaNFTEntries) AsBuilder() UpdateCotaNFTEntriesBuilder {
-	ret := NewUpdateCotaNFTEntriesBuilder().Keys(*s.Keys()).OldValues(*s.OldValues()).NewValues(*s.NewValues()).Proof(*s.Proof()).Action(*s.Action())
+	ret := NewUpdateCotaNFTEntriesBuilder().HoldKeys(*s.HoldKeys()).HoldOldValues(*s.HoldOldValues()).HoldNewValues(*s.HoldNewValues()).Proof(*s.Proof()).Action(*s.Action())
 	return *ret
 }
