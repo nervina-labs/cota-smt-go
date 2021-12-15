@@ -48,7 +48,7 @@ struct DefineCotaNFTId {
 
 vector DefineCotaNFTKeyVec <DefineCotaNFTId>;
 
-table DefineCotaNFTValue {
+struct DefineCotaNFTValue {
   total: Uint32,
   issued: Uint32,
   configure: byte,
@@ -79,7 +79,7 @@ table MintCotaNFTEntries {
 // transfer
 vector WithdrawalCotaNFTKeyVec <CotaNFTId>;
 
-table WithdrawalCotaNFTValue {
+struct WithdrawalCotaNFTValue {
   nftInfo: CotaNFTInfo,
   to: LockHashSlice,
   outPoint: OutPointSlice,
@@ -97,7 +97,7 @@ table WithdrawalCotaNFTEntries {
 }
 
 
-table ClaimCotaNFTKey {
+struct ClaimCotaNFTKey {
   nftId: CotaNFTId,
   outPoint: OutPointSlice,
 }
