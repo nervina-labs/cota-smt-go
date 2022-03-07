@@ -5723,3 +5723,1616 @@ func (s *UpdateCotaNFTEntries) AsBuilder() UpdateCotaNFTEntriesBuilder {
 	ret := NewUpdateCotaNFTEntriesBuilder().HoldKeys(*s.HoldKeys()).HoldOldValues(*s.HoldOldValues()).HoldNewValues(*s.HoldNewValues()).Proof(*s.Proof()).Action(*s.Action())
 	return *ret
 }
+
+type WithdrawalCotaNFTKeyV1Builder struct {
+	nft_id    CotaNFTId
+	out_point OutPointSlice
+}
+
+func (s *WithdrawalCotaNFTKeyV1Builder) Build() WithdrawalCotaNFTKeyV1 {
+	b := new(bytes.Buffer)
+	b.Write(s.nft_id.AsSlice())
+	b.Write(s.out_point.AsSlice())
+	return WithdrawalCotaNFTKeyV1{inner: b.Bytes()}
+}
+
+func (s *WithdrawalCotaNFTKeyV1Builder) NftId(v CotaNFTId) *WithdrawalCotaNFTKeyV1Builder {
+	s.nft_id = v
+	return s
+}
+
+func (s *WithdrawalCotaNFTKeyV1Builder) OutPoint(v OutPointSlice) *WithdrawalCotaNFTKeyV1Builder {
+	s.out_point = v
+	return s
+}
+
+func NewWithdrawalCotaNFTKeyV1Builder() *WithdrawalCotaNFTKeyV1Builder {
+	return &WithdrawalCotaNFTKeyV1Builder{nft_id: CotaNFTIdDefault(), out_point: OutPointSliceDefault()}
+}
+
+type WithdrawalCotaNFTKeyV1 struct {
+	inner []byte
+}
+
+func WithdrawalCotaNFTKeyV1FromSliceUnchecked(slice []byte) *WithdrawalCotaNFTKeyV1 {
+	return &WithdrawalCotaNFTKeyV1{inner: slice}
+}
+func (s *WithdrawalCotaNFTKeyV1) AsSlice() []byte {
+	return s.inner
+}
+
+func WithdrawalCotaNFTKeyV1Default() WithdrawalCotaNFTKeyV1 {
+	return *WithdrawalCotaNFTKeyV1FromSliceUnchecked([]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
+}
+
+func WithdrawalCotaNFTKeyV1FromSlice(slice []byte, _compatible bool) (*WithdrawalCotaNFTKeyV1, error) {
+	sliceLen := len(slice)
+	if sliceLen != 50 {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "WithdrawalCotaNFTKeyV1", strconv.Itoa(int(sliceLen)), "!=", strconv.Itoa(50)}, " ")
+		return nil, errors.New(errMsg)
+	}
+	return &WithdrawalCotaNFTKeyV1{inner: slice}, nil
+}
+
+func (s *WithdrawalCotaNFTKeyV1) NftId() *CotaNFTId {
+	ret := CotaNFTIdFromSliceUnchecked(s.inner[0:26])
+	return ret
+}
+
+func (s *WithdrawalCotaNFTKeyV1) OutPoint() *OutPointSlice {
+	ret := OutPointSliceFromSliceUnchecked(s.inner[26:50])
+	return ret
+}
+
+func (s *WithdrawalCotaNFTKeyV1) AsBuilder() WithdrawalCotaNFTKeyV1Builder {
+	ret := NewWithdrawalCotaNFTKeyV1Builder().NftId(*s.NftId()).OutPoint(*s.OutPoint())
+	return *ret
+}
+
+type WithdrawalCotaNFTKeyV1VecBuilder struct {
+	inner []WithdrawalCotaNFTKeyV1
+}
+
+func (s *WithdrawalCotaNFTKeyV1VecBuilder) Build() WithdrawalCotaNFTKeyV1Vec {
+	size := packNumber(Number(len(s.inner)))
+
+	b := new(bytes.Buffer)
+
+	b.Write(size)
+	len := len(s.inner)
+	for i := 0; i < len; i++ {
+		b.Write(s.inner[i].AsSlice())
+	}
+
+	sb := WithdrawalCotaNFTKeyV1Vec{inner: b.Bytes()}
+
+	return sb
+}
+
+func (s *WithdrawalCotaNFTKeyV1VecBuilder) Set(v []WithdrawalCotaNFTKeyV1) *WithdrawalCotaNFTKeyV1VecBuilder {
+	s.inner = v
+	return s
+}
+func (s *WithdrawalCotaNFTKeyV1VecBuilder) Push(v WithdrawalCotaNFTKeyV1) *WithdrawalCotaNFTKeyV1VecBuilder {
+	s.inner = append(s.inner, v)
+	return s
+}
+func (s *WithdrawalCotaNFTKeyV1VecBuilder) Extend(iter []WithdrawalCotaNFTKeyV1) *WithdrawalCotaNFTKeyV1VecBuilder {
+	for i := 0; i < len(iter); i++ {
+		s.inner = append(s.inner, iter[i])
+	}
+	return s
+}
+func (s *WithdrawalCotaNFTKeyV1VecBuilder) Replace(index uint, v WithdrawalCotaNFTKeyV1) *WithdrawalCotaNFTKeyV1 {
+	if uint(len(s.inner)) > index {
+		a := s.inner[index]
+		s.inner[index] = v
+		return &a
+	}
+	return nil
+}
+
+func NewWithdrawalCotaNFTKeyV1VecBuilder() *WithdrawalCotaNFTKeyV1VecBuilder {
+	return &WithdrawalCotaNFTKeyV1VecBuilder{[]WithdrawalCotaNFTKeyV1{}}
+}
+
+type WithdrawalCotaNFTKeyV1Vec struct {
+	inner []byte
+}
+
+func WithdrawalCotaNFTKeyV1VecFromSliceUnchecked(slice []byte) *WithdrawalCotaNFTKeyV1Vec {
+	return &WithdrawalCotaNFTKeyV1Vec{inner: slice}
+}
+func (s *WithdrawalCotaNFTKeyV1Vec) AsSlice() []byte {
+	return s.inner
+}
+
+func WithdrawalCotaNFTKeyV1VecDefault() WithdrawalCotaNFTKeyV1Vec {
+	return *WithdrawalCotaNFTKeyV1VecFromSliceUnchecked([]byte{0, 0, 0, 0})
+}
+
+func WithdrawalCotaNFTKeyV1VecFromSlice(slice []byte, _compatible bool) (*WithdrawalCotaNFTKeyV1Vec, error) {
+	sliceLen := len(slice)
+	if sliceLen < int(HeaderSizeUint) {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "WithdrawalCotaNFTKeyV1Vec", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint))}, " ")
+		return nil, errors.New(errMsg)
+	}
+	itemCount := unpackNumber(slice)
+	if itemCount == 0 {
+		if sliceLen != int(HeaderSizeUint) {
+			errMsg := strings.Join([]string{"TotalSizeNotMatch", "WithdrawalCotaNFTKeyV1Vec", strconv.Itoa(int(sliceLen)), "!=", strconv.Itoa(int(HeaderSizeUint))}, " ")
+			return nil, errors.New(errMsg)
+		}
+		return &WithdrawalCotaNFTKeyV1Vec{inner: slice}, nil
+	}
+	totalSize := int(HeaderSizeUint) + int(50*itemCount)
+	if sliceLen != totalSize {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "WithdrawalCotaNFTKeyV1Vec", strconv.Itoa(int(sliceLen)), "!=", strconv.Itoa(int(totalSize))}, " ")
+		return nil, errors.New(errMsg)
+	}
+	return &WithdrawalCotaNFTKeyV1Vec{inner: slice}, nil
+}
+
+func (s *WithdrawalCotaNFTKeyV1Vec) TotalSize() uint {
+	return uint(HeaderSizeUint) + 50*s.ItemCount()
+}
+func (s *WithdrawalCotaNFTKeyV1Vec) ItemCount() uint {
+	number := uint(unpackNumber(s.inner))
+	return number
+}
+func (s *WithdrawalCotaNFTKeyV1Vec) Len() uint {
+	return s.ItemCount()
+}
+func (s *WithdrawalCotaNFTKeyV1Vec) IsEmpty() bool {
+	return s.Len() == 0
+}
+
+// if *WithdrawalCotaNFTKeyV1 is nil, index is out of bounds
+func (s *WithdrawalCotaNFTKeyV1Vec) Get(index uint) *WithdrawalCotaNFTKeyV1 {
+	var re *WithdrawalCotaNFTKeyV1
+	if index < s.Len() {
+		start := uint(HeaderSizeUint) + 50*index
+		end := start + 50
+		re = WithdrawalCotaNFTKeyV1FromSliceUnchecked(s.inner[start:end])
+	}
+	return re
+}
+
+func (s *WithdrawalCotaNFTKeyV1Vec) AsBuilder() WithdrawalCotaNFTKeyV1VecBuilder {
+	size := s.ItemCount()
+	t := NewWithdrawalCotaNFTKeyV1VecBuilder()
+	for i := uint(0); i < size; i++ {
+		t.Push(*s.Get(i))
+	}
+	return *t
+}
+
+type WithdrawalCotaNFTValueV1Builder struct {
+	nft_info CotaNFTInfo
+	to_lock  Bytes
+}
+
+func (s *WithdrawalCotaNFTValueV1Builder) Build() WithdrawalCotaNFTValueV1 {
+	b := new(bytes.Buffer)
+
+	totalSize := HeaderSizeUint * (2 + 1)
+	offsets := make([]uint32, 0, 2)
+
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.nft_info.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.to_lock.AsSlice()))
+
+	b.Write(packNumber(Number(totalSize)))
+
+	for i := 0; i < len(offsets); i++ {
+		b.Write(packNumber(Number(offsets[i])))
+	}
+
+	b.Write(s.nft_info.AsSlice())
+	b.Write(s.to_lock.AsSlice())
+	return WithdrawalCotaNFTValueV1{inner: b.Bytes()}
+}
+
+func (s *WithdrawalCotaNFTValueV1Builder) NftInfo(v CotaNFTInfo) *WithdrawalCotaNFTValueV1Builder {
+	s.nft_info = v
+	return s
+}
+
+func (s *WithdrawalCotaNFTValueV1Builder) ToLock(v Bytes) *WithdrawalCotaNFTValueV1Builder {
+	s.to_lock = v
+	return s
+}
+
+func NewWithdrawalCotaNFTValueV1Builder() *WithdrawalCotaNFTValueV1Builder {
+	return &WithdrawalCotaNFTValueV1Builder{nft_info: CotaNFTInfoDefault(), to_lock: BytesDefault()}
+}
+
+type WithdrawalCotaNFTValueV1 struct {
+	inner []byte
+}
+
+func WithdrawalCotaNFTValueV1FromSliceUnchecked(slice []byte) *WithdrawalCotaNFTValueV1 {
+	return &WithdrawalCotaNFTValueV1{inner: slice}
+}
+func (s *WithdrawalCotaNFTValueV1) AsSlice() []byte {
+	return s.inner
+}
+
+func WithdrawalCotaNFTValueV1Default() WithdrawalCotaNFTValueV1 {
+	return *WithdrawalCotaNFTValueV1FromSliceUnchecked([]byte{38, 0, 0, 0, 12, 0, 0, 0, 34, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
+}
+
+func WithdrawalCotaNFTValueV1FromSlice(slice []byte, compatible bool) (*WithdrawalCotaNFTValueV1, error) {
+	sliceLen := len(slice)
+	if uint32(sliceLen) < HeaderSizeUint {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "WithdrawalCotaNFTValueV1", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	totalSize := unpackNumber(slice)
+	if Number(sliceLen) != totalSize {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "WithdrawalCotaNFTValueV1", strconv.Itoa(int(sliceLen)), "!=", strconv.Itoa(int(totalSize))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if uint32(sliceLen) == HeaderSizeUint && 2 == 0 {
+		return &WithdrawalCotaNFTValueV1{inner: slice}, nil
+	}
+
+	if uint32(sliceLen) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "WithdrawalCotaNFTValueV1", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	offsetFirst := unpackNumber(slice[HeaderSizeUint:])
+	if uint32(offsetFirst)%HeaderSizeUint != 0 || uint32(offsetFirst) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"OffsetsNotMatch", "WithdrawalCotaNFTValueV1", strconv.Itoa(int(offsetFirst % 4)), "!= 0", strconv.Itoa(int(offsetFirst)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if sliceLen < int(offsetFirst) {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "WithdrawalCotaNFTValueV1", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(offsetFirst))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	fieldCount := uint32(offsetFirst)/HeaderSizeUint - 1
+	if fieldCount < 2 {
+		return nil, errors.New("FieldCountNotMatch")
+	} else if !compatible && fieldCount > 2 {
+		return nil, errors.New("FieldCountNotMatch")
+	}
+
+	offsets := make([]uint32, fieldCount)
+
+	for i := 0; i < int(fieldCount); i++ {
+		offsets[i] = uint32(unpackNumber(slice[HeaderSizeUint:][int(HeaderSizeUint)*i:]))
+	}
+	offsets = append(offsets, uint32(totalSize))
+
+	for i := 0; i < len(offsets); i++ {
+		if i&1 != 0 && offsets[i-1] > offsets[i] {
+			return nil, errors.New("OffsetsNotMatch")
+		}
+	}
+
+	var err error
+
+	_, err = CotaNFTInfoFromSlice(slice[offsets[0]:offsets[1]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[1]:offsets[2]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	return &WithdrawalCotaNFTValueV1{inner: slice}, nil
+}
+
+func (s *WithdrawalCotaNFTValueV1) TotalSize() uint {
+	return uint(unpackNumber(s.inner))
+}
+func (s *WithdrawalCotaNFTValueV1) FieldCount() uint {
+	var number uint = 0
+	if uint32(s.TotalSize()) == HeaderSizeUint {
+		return number
+	}
+	number = uint(unpackNumber(s.inner[HeaderSizeUint:]))/4 - 1
+	return number
+}
+func (s *WithdrawalCotaNFTValueV1) Len() uint {
+	return s.FieldCount()
+}
+func (s *WithdrawalCotaNFTValueV1) IsEmpty() bool {
+	return s.Len() == 0
+}
+func (s *WithdrawalCotaNFTValueV1) CountExtraFields() uint {
+	return s.FieldCount() - 2
+}
+
+func (s *WithdrawalCotaNFTValueV1) HasExtraFields() bool {
+	return 2 != s.FieldCount()
+}
+
+func (s *WithdrawalCotaNFTValueV1) NftInfo() *CotaNFTInfo {
+	start := unpackNumber(s.inner[4:])
+	end := unpackNumber(s.inner[8:])
+	return CotaNFTInfoFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *WithdrawalCotaNFTValueV1) ToLock() *Bytes {
+	var ret *Bytes
+	start := unpackNumber(s.inner[8:])
+	if s.HasExtraFields() {
+		end := unpackNumber(s.inner[12:])
+		ret = BytesFromSliceUnchecked(s.inner[start:end])
+	} else {
+		ret = BytesFromSliceUnchecked(s.inner[start:])
+	}
+	return ret
+}
+
+func (s *WithdrawalCotaNFTValueV1) AsBuilder() WithdrawalCotaNFTValueV1Builder {
+	ret := NewWithdrawalCotaNFTValueV1Builder().NftInfo(*s.NftInfo()).ToLock(*s.ToLock())
+	return *ret
+}
+
+type WithdrawalCotaNFTValueV1VecBuilder struct {
+	inner []WithdrawalCotaNFTValueV1
+}
+
+func (s *WithdrawalCotaNFTValueV1VecBuilder) Build() WithdrawalCotaNFTValueV1Vec {
+	itemCount := len(s.inner)
+
+	b := new(bytes.Buffer)
+
+	// Empty dyn vector, just return size's bytes
+	if itemCount == 0 {
+		b.Write(packNumber(Number(HeaderSizeUint)))
+		return WithdrawalCotaNFTValueV1Vec{inner: b.Bytes()}
+	}
+
+	// Calculate first offset then loop for rest items offsets
+	totalSize := HeaderSizeUint * uint32(itemCount+1)
+	offsets := make([]uint32, 0, itemCount)
+	offsets = append(offsets, totalSize)
+	for i := 1; i < itemCount; i++ {
+		totalSize += uint32(len(s.inner[i-1].AsSlice()))
+		offsets = append(offsets, offsets[i-1]+uint32(len(s.inner[i-1].AsSlice())))
+	}
+	totalSize += uint32(len(s.inner[itemCount-1].AsSlice()))
+
+	b.Write(packNumber(Number(totalSize)))
+
+	for i := 0; i < itemCount; i++ {
+		b.Write(packNumber(Number(offsets[i])))
+	}
+
+	for i := 0; i < itemCount; i++ {
+		b.Write(s.inner[i].AsSlice())
+	}
+
+	return WithdrawalCotaNFTValueV1Vec{inner: b.Bytes()}
+}
+
+func (s *WithdrawalCotaNFTValueV1VecBuilder) Set(v []WithdrawalCotaNFTValueV1) *WithdrawalCotaNFTValueV1VecBuilder {
+	s.inner = v
+	return s
+}
+func (s *WithdrawalCotaNFTValueV1VecBuilder) Push(v WithdrawalCotaNFTValueV1) *WithdrawalCotaNFTValueV1VecBuilder {
+	s.inner = append(s.inner, v)
+	return s
+}
+func (s *WithdrawalCotaNFTValueV1VecBuilder) Extend(iter []WithdrawalCotaNFTValueV1) *WithdrawalCotaNFTValueV1VecBuilder {
+	for i := 0; i < len(iter); i++ {
+		s.inner = append(s.inner, iter[i])
+	}
+	return s
+}
+func (s *WithdrawalCotaNFTValueV1VecBuilder) Replace(index uint, v WithdrawalCotaNFTValueV1) *WithdrawalCotaNFTValueV1 {
+	if uint(len(s.inner)) > index {
+		a := s.inner[index]
+		s.inner[index] = v
+		return &a
+	}
+	return nil
+}
+
+func NewWithdrawalCotaNFTValueV1VecBuilder() *WithdrawalCotaNFTValueV1VecBuilder {
+	return &WithdrawalCotaNFTValueV1VecBuilder{[]WithdrawalCotaNFTValueV1{}}
+}
+
+type WithdrawalCotaNFTValueV1Vec struct {
+	inner []byte
+}
+
+func WithdrawalCotaNFTValueV1VecFromSliceUnchecked(slice []byte) *WithdrawalCotaNFTValueV1Vec {
+	return &WithdrawalCotaNFTValueV1Vec{inner: slice}
+}
+func (s *WithdrawalCotaNFTValueV1Vec) AsSlice() []byte {
+	return s.inner
+}
+
+func WithdrawalCotaNFTValueV1VecDefault() WithdrawalCotaNFTValueV1Vec {
+	return *WithdrawalCotaNFTValueV1VecFromSliceUnchecked([]byte{4, 0, 0, 0})
+}
+
+func WithdrawalCotaNFTValueV1VecFromSlice(slice []byte, compatible bool) (*WithdrawalCotaNFTValueV1Vec, error) {
+	sliceLen := len(slice)
+
+	if uint32(sliceLen) < HeaderSizeUint {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "WithdrawalCotaNFTValueV1Vec", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	totalSize := unpackNumber(slice)
+	if Number(sliceLen) != totalSize {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "WithdrawalCotaNFTValueV1Vec", strconv.Itoa(int(sliceLen)), "!=", strconv.Itoa(int(totalSize))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if uint32(sliceLen) == HeaderSizeUint {
+		return &WithdrawalCotaNFTValueV1Vec{inner: slice}, nil
+	}
+
+	if uint32(sliceLen) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "WithdrawalCotaNFTValueV1Vec", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	offsetFirst := unpackNumber(slice[HeaderSizeUint:])
+	if uint32(offsetFirst)%HeaderSizeUint != 0 || uint32(offsetFirst) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"OffsetsNotMatch", "WithdrawalCotaNFTValueV1Vec", strconv.Itoa(int(offsetFirst % 4)), "!= 0", strconv.Itoa(int(offsetFirst)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if sliceLen < int(offsetFirst) {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "WithdrawalCotaNFTValueV1Vec", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(offsetFirst))}, " ")
+		return nil, errors.New(errMsg)
+	}
+	itemCount := uint32(offsetFirst)/HeaderSizeUint - 1
+
+	offsets := make([]uint32, itemCount)
+
+	for i := 0; i < int(itemCount); i++ {
+		offsets[i] = uint32(unpackNumber(slice[HeaderSizeUint:][int(HeaderSizeUint)*i:]))
+	}
+
+	offsets = append(offsets, uint32(totalSize))
+
+	for i := 0; i < len(offsets); i++ {
+		if i&1 != 0 && offsets[i-1] > offsets[i] {
+			errMsg := strings.Join([]string{"OffsetsNotMatch", "WithdrawalCotaNFTValueV1Vec"}, " ")
+			return nil, errors.New(errMsg)
+		}
+	}
+
+	for i := 0; i < len(offsets); i++ {
+		if i&1 != 0 {
+			start := offsets[i-1]
+			end := offsets[i]
+			_, err := WithdrawalCotaNFTValueV1FromSlice(slice[start:end], compatible)
+
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	return &WithdrawalCotaNFTValueV1Vec{inner: slice}, nil
+}
+
+func (s *WithdrawalCotaNFTValueV1Vec) TotalSize() uint {
+	return uint(unpackNumber(s.inner))
+}
+func (s *WithdrawalCotaNFTValueV1Vec) ItemCount() uint {
+	var number uint = 0
+	if uint32(s.TotalSize()) == HeaderSizeUint {
+		return number
+	}
+	number = uint(unpackNumber(s.inner[HeaderSizeUint:]))/4 - 1
+	return number
+}
+func (s *WithdrawalCotaNFTValueV1Vec) Len() uint {
+	return s.ItemCount()
+}
+func (s *WithdrawalCotaNFTValueV1Vec) IsEmpty() bool {
+	return s.Len() == 0
+}
+
+// if *WithdrawalCotaNFTValueV1 is nil, index is out of bounds
+func (s *WithdrawalCotaNFTValueV1Vec) Get(index uint) *WithdrawalCotaNFTValueV1 {
+	var b *WithdrawalCotaNFTValueV1
+	if index < s.Len() {
+		start_index := uint(HeaderSizeUint) * (1 + index)
+		start := unpackNumber(s.inner[start_index:])
+
+		if index == s.Len()-1 {
+			b = WithdrawalCotaNFTValueV1FromSliceUnchecked(s.inner[start:])
+		} else {
+			end_index := start_index + uint(HeaderSizeUint)
+			end := unpackNumber(s.inner[end_index:])
+			b = WithdrawalCotaNFTValueV1FromSliceUnchecked(s.inner[start:end])
+		}
+	}
+	return b
+}
+
+func (s *WithdrawalCotaNFTValueV1Vec) AsBuilder() WithdrawalCotaNFTValueV1VecBuilder {
+	size := s.ItemCount()
+	t := NewWithdrawalCotaNFTValueV1VecBuilder()
+	for i := uint(0); i < size; i++ {
+		t.Push(*s.Get(i))
+	}
+	return *t
+}
+
+type MintCotaNFTV1EntriesBuilder struct {
+	define_keys       DefineCotaNFTKeyVec
+	define_old_values DefineCotaNFTValueVec
+	define_new_values DefineCotaNFTValueVec
+	withdrawal_keys   WithdrawalCotaNFTKeyV1Vec
+	withdrawal_values WithdrawalCotaNFTValueV1Vec
+	proof             Bytes
+	action            Bytes
+}
+
+func (s *MintCotaNFTV1EntriesBuilder) Build() MintCotaNFTV1Entries {
+	b := new(bytes.Buffer)
+
+	totalSize := HeaderSizeUint * (7 + 1)
+	offsets := make([]uint32, 0, 7)
+
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.define_keys.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.define_old_values.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.define_new_values.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.withdrawal_keys.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.withdrawal_values.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.proof.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.action.AsSlice()))
+
+	b.Write(packNumber(Number(totalSize)))
+
+	for i := 0; i < len(offsets); i++ {
+		b.Write(packNumber(Number(offsets[i])))
+	}
+
+	b.Write(s.define_keys.AsSlice())
+	b.Write(s.define_old_values.AsSlice())
+	b.Write(s.define_new_values.AsSlice())
+	b.Write(s.withdrawal_keys.AsSlice())
+	b.Write(s.withdrawal_values.AsSlice())
+	b.Write(s.proof.AsSlice())
+	b.Write(s.action.AsSlice())
+	return MintCotaNFTV1Entries{inner: b.Bytes()}
+}
+
+func (s *MintCotaNFTV1EntriesBuilder) DefineKeys(v DefineCotaNFTKeyVec) *MintCotaNFTV1EntriesBuilder {
+	s.define_keys = v
+	return s
+}
+
+func (s *MintCotaNFTV1EntriesBuilder) DefineOldValues(v DefineCotaNFTValueVec) *MintCotaNFTV1EntriesBuilder {
+	s.define_old_values = v
+	return s
+}
+
+func (s *MintCotaNFTV1EntriesBuilder) DefineNewValues(v DefineCotaNFTValueVec) *MintCotaNFTV1EntriesBuilder {
+	s.define_new_values = v
+	return s
+}
+
+func (s *MintCotaNFTV1EntriesBuilder) WithdrawalKeys(v WithdrawalCotaNFTKeyV1Vec) *MintCotaNFTV1EntriesBuilder {
+	s.withdrawal_keys = v
+	return s
+}
+
+func (s *MintCotaNFTV1EntriesBuilder) WithdrawalValues(v WithdrawalCotaNFTValueV1Vec) *MintCotaNFTV1EntriesBuilder {
+	s.withdrawal_values = v
+	return s
+}
+
+func (s *MintCotaNFTV1EntriesBuilder) Proof(v Bytes) *MintCotaNFTV1EntriesBuilder {
+	s.proof = v
+	return s
+}
+
+func (s *MintCotaNFTV1EntriesBuilder) Action(v Bytes) *MintCotaNFTV1EntriesBuilder {
+	s.action = v
+	return s
+}
+
+func NewMintCotaNFTV1EntriesBuilder() *MintCotaNFTV1EntriesBuilder {
+	return &MintCotaNFTV1EntriesBuilder{define_keys: DefineCotaNFTKeyVecDefault(), define_old_values: DefineCotaNFTValueVecDefault(), define_new_values: DefineCotaNFTValueVecDefault(), withdrawal_keys: WithdrawalCotaNFTKeyV1VecDefault(), withdrawal_values: WithdrawalCotaNFTValueV1VecDefault(), proof: BytesDefault(), action: BytesDefault()}
+}
+
+type MintCotaNFTV1Entries struct {
+	inner []byte
+}
+
+func MintCotaNFTV1EntriesFromSliceUnchecked(slice []byte) *MintCotaNFTV1Entries {
+	return &MintCotaNFTV1Entries{inner: slice}
+}
+func (s *MintCotaNFTV1Entries) AsSlice() []byte {
+	return s.inner
+}
+
+func MintCotaNFTV1EntriesDefault() MintCotaNFTV1Entries {
+	return *MintCotaNFTV1EntriesFromSliceUnchecked([]byte{60, 0, 0, 0, 32, 0, 0, 0, 36, 0, 0, 0, 40, 0, 0, 0, 44, 0, 0, 0, 48, 0, 0, 0, 52, 0, 0, 0, 56, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
+}
+
+func MintCotaNFTV1EntriesFromSlice(slice []byte, compatible bool) (*MintCotaNFTV1Entries, error) {
+	sliceLen := len(slice)
+	if uint32(sliceLen) < HeaderSizeUint {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "MintCotaNFTV1Entries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	totalSize := unpackNumber(slice)
+	if Number(sliceLen) != totalSize {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "MintCotaNFTV1Entries", strconv.Itoa(int(sliceLen)), "!=", strconv.Itoa(int(totalSize))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if uint32(sliceLen) == HeaderSizeUint && 7 == 0 {
+		return &MintCotaNFTV1Entries{inner: slice}, nil
+	}
+
+	if uint32(sliceLen) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "MintCotaNFTV1Entries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	offsetFirst := unpackNumber(slice[HeaderSizeUint:])
+	if uint32(offsetFirst)%HeaderSizeUint != 0 || uint32(offsetFirst) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"OffsetsNotMatch", "MintCotaNFTV1Entries", strconv.Itoa(int(offsetFirst % 4)), "!= 0", strconv.Itoa(int(offsetFirst)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if sliceLen < int(offsetFirst) {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "MintCotaNFTV1Entries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(offsetFirst))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	fieldCount := uint32(offsetFirst)/HeaderSizeUint - 1
+	if fieldCount < 7 {
+		return nil, errors.New("FieldCountNotMatch")
+	} else if !compatible && fieldCount > 7 {
+		return nil, errors.New("FieldCountNotMatch")
+	}
+
+	offsets := make([]uint32, fieldCount)
+
+	for i := 0; i < int(fieldCount); i++ {
+		offsets[i] = uint32(unpackNumber(slice[HeaderSizeUint:][int(HeaderSizeUint)*i:]))
+	}
+	offsets = append(offsets, uint32(totalSize))
+
+	for i := 0; i < len(offsets); i++ {
+		if i&1 != 0 && offsets[i-1] > offsets[i] {
+			return nil, errors.New("OffsetsNotMatch")
+		}
+	}
+
+	var err error
+
+	_, err = DefineCotaNFTKeyVecFromSlice(slice[offsets[0]:offsets[1]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = DefineCotaNFTValueVecFromSlice(slice[offsets[1]:offsets[2]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = DefineCotaNFTValueVecFromSlice(slice[offsets[2]:offsets[3]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = WithdrawalCotaNFTKeyV1VecFromSlice(slice[offsets[3]:offsets[4]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = WithdrawalCotaNFTValueV1VecFromSlice(slice[offsets[4]:offsets[5]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[5]:offsets[6]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[6]:offsets[7]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	return &MintCotaNFTV1Entries{inner: slice}, nil
+}
+
+func (s *MintCotaNFTV1Entries) TotalSize() uint {
+	return uint(unpackNumber(s.inner))
+}
+func (s *MintCotaNFTV1Entries) FieldCount() uint {
+	var number uint = 0
+	if uint32(s.TotalSize()) == HeaderSizeUint {
+		return number
+	}
+	number = uint(unpackNumber(s.inner[HeaderSizeUint:]))/4 - 1
+	return number
+}
+func (s *MintCotaNFTV1Entries) Len() uint {
+	return s.FieldCount()
+}
+func (s *MintCotaNFTV1Entries) IsEmpty() bool {
+	return s.Len() == 0
+}
+func (s *MintCotaNFTV1Entries) CountExtraFields() uint {
+	return s.FieldCount() - 7
+}
+
+func (s *MintCotaNFTV1Entries) HasExtraFields() bool {
+	return 7 != s.FieldCount()
+}
+
+func (s *MintCotaNFTV1Entries) DefineKeys() *DefineCotaNFTKeyVec {
+	start := unpackNumber(s.inner[4:])
+	end := unpackNumber(s.inner[8:])
+	return DefineCotaNFTKeyVecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *MintCotaNFTV1Entries) DefineOldValues() *DefineCotaNFTValueVec {
+	start := unpackNumber(s.inner[8:])
+	end := unpackNumber(s.inner[12:])
+	return DefineCotaNFTValueVecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *MintCotaNFTV1Entries) DefineNewValues() *DefineCotaNFTValueVec {
+	start := unpackNumber(s.inner[12:])
+	end := unpackNumber(s.inner[16:])
+	return DefineCotaNFTValueVecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *MintCotaNFTV1Entries) WithdrawalKeys() *WithdrawalCotaNFTKeyV1Vec {
+	start := unpackNumber(s.inner[16:])
+	end := unpackNumber(s.inner[20:])
+	return WithdrawalCotaNFTKeyV1VecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *MintCotaNFTV1Entries) WithdrawalValues() *WithdrawalCotaNFTValueV1Vec {
+	start := unpackNumber(s.inner[20:])
+	end := unpackNumber(s.inner[24:])
+	return WithdrawalCotaNFTValueV1VecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *MintCotaNFTV1Entries) Proof() *Bytes {
+	start := unpackNumber(s.inner[24:])
+	end := unpackNumber(s.inner[28:])
+	return BytesFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *MintCotaNFTV1Entries) Action() *Bytes {
+	var ret *Bytes
+	start := unpackNumber(s.inner[28:])
+	if s.HasExtraFields() {
+		end := unpackNumber(s.inner[32:])
+		ret = BytesFromSliceUnchecked(s.inner[start:end])
+	} else {
+		ret = BytesFromSliceUnchecked(s.inner[start:])
+	}
+	return ret
+}
+
+func (s *MintCotaNFTV1Entries) AsBuilder() MintCotaNFTV1EntriesBuilder {
+	ret := NewMintCotaNFTV1EntriesBuilder().DefineKeys(*s.DefineKeys()).DefineOldValues(*s.DefineOldValues()).DefineNewValues(*s.DefineNewValues()).WithdrawalKeys(*s.WithdrawalKeys()).WithdrawalValues(*s.WithdrawalValues()).Proof(*s.Proof()).Action(*s.Action())
+	return *ret
+}
+
+type WithdrawalCotaNFTV1EntriesBuilder struct {
+	hold_keys         HoldCotaNFTKeyVec
+	hold_values       HoldCotaNFTValueVec
+	withdrawal_keys   WithdrawalCotaNFTKeyV1Vec
+	withdrawal_values WithdrawalCotaNFTValueV1Vec
+	proof             Bytes
+	action            Bytes
+}
+
+func (s *WithdrawalCotaNFTV1EntriesBuilder) Build() WithdrawalCotaNFTV1Entries {
+	b := new(bytes.Buffer)
+
+	totalSize := HeaderSizeUint * (6 + 1)
+	offsets := make([]uint32, 0, 6)
+
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.hold_keys.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.hold_values.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.withdrawal_keys.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.withdrawal_values.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.proof.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.action.AsSlice()))
+
+	b.Write(packNumber(Number(totalSize)))
+
+	for i := 0; i < len(offsets); i++ {
+		b.Write(packNumber(Number(offsets[i])))
+	}
+
+	b.Write(s.hold_keys.AsSlice())
+	b.Write(s.hold_values.AsSlice())
+	b.Write(s.withdrawal_keys.AsSlice())
+	b.Write(s.withdrawal_values.AsSlice())
+	b.Write(s.proof.AsSlice())
+	b.Write(s.action.AsSlice())
+	return WithdrawalCotaNFTV1Entries{inner: b.Bytes()}
+}
+
+func (s *WithdrawalCotaNFTV1EntriesBuilder) HoldKeys(v HoldCotaNFTKeyVec) *WithdrawalCotaNFTV1EntriesBuilder {
+	s.hold_keys = v
+	return s
+}
+
+func (s *WithdrawalCotaNFTV1EntriesBuilder) HoldValues(v HoldCotaNFTValueVec) *WithdrawalCotaNFTV1EntriesBuilder {
+	s.hold_values = v
+	return s
+}
+
+func (s *WithdrawalCotaNFTV1EntriesBuilder) WithdrawalKeys(v WithdrawalCotaNFTKeyV1Vec) *WithdrawalCotaNFTV1EntriesBuilder {
+	s.withdrawal_keys = v
+	return s
+}
+
+func (s *WithdrawalCotaNFTV1EntriesBuilder) WithdrawalValues(v WithdrawalCotaNFTValueV1Vec) *WithdrawalCotaNFTV1EntriesBuilder {
+	s.withdrawal_values = v
+	return s
+}
+
+func (s *WithdrawalCotaNFTV1EntriesBuilder) Proof(v Bytes) *WithdrawalCotaNFTV1EntriesBuilder {
+	s.proof = v
+	return s
+}
+
+func (s *WithdrawalCotaNFTV1EntriesBuilder) Action(v Bytes) *WithdrawalCotaNFTV1EntriesBuilder {
+	s.action = v
+	return s
+}
+
+func NewWithdrawalCotaNFTV1EntriesBuilder() *WithdrawalCotaNFTV1EntriesBuilder {
+	return &WithdrawalCotaNFTV1EntriesBuilder{hold_keys: HoldCotaNFTKeyVecDefault(), hold_values: HoldCotaNFTValueVecDefault(), withdrawal_keys: WithdrawalCotaNFTKeyV1VecDefault(), withdrawal_values: WithdrawalCotaNFTValueV1VecDefault(), proof: BytesDefault(), action: BytesDefault()}
+}
+
+type WithdrawalCotaNFTV1Entries struct {
+	inner []byte
+}
+
+func WithdrawalCotaNFTV1EntriesFromSliceUnchecked(slice []byte) *WithdrawalCotaNFTV1Entries {
+	return &WithdrawalCotaNFTV1Entries{inner: slice}
+}
+func (s *WithdrawalCotaNFTV1Entries) AsSlice() []byte {
+	return s.inner
+}
+
+func WithdrawalCotaNFTV1EntriesDefault() WithdrawalCotaNFTV1Entries {
+	return *WithdrawalCotaNFTV1EntriesFromSliceUnchecked([]byte{52, 0, 0, 0, 28, 0, 0, 0, 32, 0, 0, 0, 36, 0, 0, 0, 40, 0, 0, 0, 44, 0, 0, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
+}
+
+func WithdrawalCotaNFTV1EntriesFromSlice(slice []byte, compatible bool) (*WithdrawalCotaNFTV1Entries, error) {
+	sliceLen := len(slice)
+	if uint32(sliceLen) < HeaderSizeUint {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "WithdrawalCotaNFTV1Entries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	totalSize := unpackNumber(slice)
+	if Number(sliceLen) != totalSize {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "WithdrawalCotaNFTV1Entries", strconv.Itoa(int(sliceLen)), "!=", strconv.Itoa(int(totalSize))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if uint32(sliceLen) == HeaderSizeUint && 6 == 0 {
+		return &WithdrawalCotaNFTV1Entries{inner: slice}, nil
+	}
+
+	if uint32(sliceLen) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "WithdrawalCotaNFTV1Entries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	offsetFirst := unpackNumber(slice[HeaderSizeUint:])
+	if uint32(offsetFirst)%HeaderSizeUint != 0 || uint32(offsetFirst) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"OffsetsNotMatch", "WithdrawalCotaNFTV1Entries", strconv.Itoa(int(offsetFirst % 4)), "!= 0", strconv.Itoa(int(offsetFirst)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if sliceLen < int(offsetFirst) {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "WithdrawalCotaNFTV1Entries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(offsetFirst))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	fieldCount := uint32(offsetFirst)/HeaderSizeUint - 1
+	if fieldCount < 6 {
+		return nil, errors.New("FieldCountNotMatch")
+	} else if !compatible && fieldCount > 6 {
+		return nil, errors.New("FieldCountNotMatch")
+	}
+
+	offsets := make([]uint32, fieldCount)
+
+	for i := 0; i < int(fieldCount); i++ {
+		offsets[i] = uint32(unpackNumber(slice[HeaderSizeUint:][int(HeaderSizeUint)*i:]))
+	}
+	offsets = append(offsets, uint32(totalSize))
+
+	for i := 0; i < len(offsets); i++ {
+		if i&1 != 0 && offsets[i-1] > offsets[i] {
+			return nil, errors.New("OffsetsNotMatch")
+		}
+	}
+
+	var err error
+
+	_, err = HoldCotaNFTKeyVecFromSlice(slice[offsets[0]:offsets[1]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = HoldCotaNFTValueVecFromSlice(slice[offsets[1]:offsets[2]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = WithdrawalCotaNFTKeyV1VecFromSlice(slice[offsets[2]:offsets[3]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = WithdrawalCotaNFTValueV1VecFromSlice(slice[offsets[3]:offsets[4]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[4]:offsets[5]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[5]:offsets[6]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	return &WithdrawalCotaNFTV1Entries{inner: slice}, nil
+}
+
+func (s *WithdrawalCotaNFTV1Entries) TotalSize() uint {
+	return uint(unpackNumber(s.inner))
+}
+func (s *WithdrawalCotaNFTV1Entries) FieldCount() uint {
+	var number uint = 0
+	if uint32(s.TotalSize()) == HeaderSizeUint {
+		return number
+	}
+	number = uint(unpackNumber(s.inner[HeaderSizeUint:]))/4 - 1
+	return number
+}
+func (s *WithdrawalCotaNFTV1Entries) Len() uint {
+	return s.FieldCount()
+}
+func (s *WithdrawalCotaNFTV1Entries) IsEmpty() bool {
+	return s.Len() == 0
+}
+func (s *WithdrawalCotaNFTV1Entries) CountExtraFields() uint {
+	return s.FieldCount() - 6
+}
+
+func (s *WithdrawalCotaNFTV1Entries) HasExtraFields() bool {
+	return 6 != s.FieldCount()
+}
+
+func (s *WithdrawalCotaNFTV1Entries) HoldKeys() *HoldCotaNFTKeyVec {
+	start := unpackNumber(s.inner[4:])
+	end := unpackNumber(s.inner[8:])
+	return HoldCotaNFTKeyVecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *WithdrawalCotaNFTV1Entries) HoldValues() *HoldCotaNFTValueVec {
+	start := unpackNumber(s.inner[8:])
+	end := unpackNumber(s.inner[12:])
+	return HoldCotaNFTValueVecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *WithdrawalCotaNFTV1Entries) WithdrawalKeys() *WithdrawalCotaNFTKeyV1Vec {
+	start := unpackNumber(s.inner[12:])
+	end := unpackNumber(s.inner[16:])
+	return WithdrawalCotaNFTKeyV1VecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *WithdrawalCotaNFTV1Entries) WithdrawalValues() *WithdrawalCotaNFTValueV1Vec {
+	start := unpackNumber(s.inner[16:])
+	end := unpackNumber(s.inner[20:])
+	return WithdrawalCotaNFTValueV1VecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *WithdrawalCotaNFTV1Entries) Proof() *Bytes {
+	start := unpackNumber(s.inner[20:])
+	end := unpackNumber(s.inner[24:])
+	return BytesFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *WithdrawalCotaNFTV1Entries) Action() *Bytes {
+	var ret *Bytes
+	start := unpackNumber(s.inner[24:])
+	if s.HasExtraFields() {
+		end := unpackNumber(s.inner[28:])
+		ret = BytesFromSliceUnchecked(s.inner[start:end])
+	} else {
+		ret = BytesFromSliceUnchecked(s.inner[start:])
+	}
+	return ret
+}
+
+func (s *WithdrawalCotaNFTV1Entries) AsBuilder() WithdrawalCotaNFTV1EntriesBuilder {
+	ret := NewWithdrawalCotaNFTV1EntriesBuilder().HoldKeys(*s.HoldKeys()).HoldValues(*s.HoldValues()).WithdrawalKeys(*s.WithdrawalKeys()).WithdrawalValues(*s.WithdrawalValues()).Proof(*s.Proof()).Action(*s.Action())
+	return *ret
+}
+
+type TransferCotaNFTV1EntriesBuilder struct {
+	claim_keys        ClaimCotaNFTKeyVec
+	claim_values      ClaimCotaNFTValueVec
+	withdrawal_keys   WithdrawalCotaNFTKeyV1Vec
+	withdrawal_values WithdrawalCotaNFTValueV1Vec
+	proof             Bytes
+	withdrawal_proof  Bytes
+	action            Bytes
+}
+
+func (s *TransferCotaNFTV1EntriesBuilder) Build() TransferCotaNFTV1Entries {
+	b := new(bytes.Buffer)
+
+	totalSize := HeaderSizeUint * (7 + 1)
+	offsets := make([]uint32, 0, 7)
+
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.claim_keys.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.claim_values.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.withdrawal_keys.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.withdrawal_values.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.proof.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.withdrawal_proof.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.action.AsSlice()))
+
+	b.Write(packNumber(Number(totalSize)))
+
+	for i := 0; i < len(offsets); i++ {
+		b.Write(packNumber(Number(offsets[i])))
+	}
+
+	b.Write(s.claim_keys.AsSlice())
+	b.Write(s.claim_values.AsSlice())
+	b.Write(s.withdrawal_keys.AsSlice())
+	b.Write(s.withdrawal_values.AsSlice())
+	b.Write(s.proof.AsSlice())
+	b.Write(s.withdrawal_proof.AsSlice())
+	b.Write(s.action.AsSlice())
+	return TransferCotaNFTV1Entries{inner: b.Bytes()}
+}
+
+func (s *TransferCotaNFTV1EntriesBuilder) ClaimKeys(v ClaimCotaNFTKeyVec) *TransferCotaNFTV1EntriesBuilder {
+	s.claim_keys = v
+	return s
+}
+
+func (s *TransferCotaNFTV1EntriesBuilder) ClaimValues(v ClaimCotaNFTValueVec) *TransferCotaNFTV1EntriesBuilder {
+	s.claim_values = v
+	return s
+}
+
+func (s *TransferCotaNFTV1EntriesBuilder) WithdrawalKeys(v WithdrawalCotaNFTKeyV1Vec) *TransferCotaNFTV1EntriesBuilder {
+	s.withdrawal_keys = v
+	return s
+}
+
+func (s *TransferCotaNFTV1EntriesBuilder) WithdrawalValues(v WithdrawalCotaNFTValueV1Vec) *TransferCotaNFTV1EntriesBuilder {
+	s.withdrawal_values = v
+	return s
+}
+
+func (s *TransferCotaNFTV1EntriesBuilder) Proof(v Bytes) *TransferCotaNFTV1EntriesBuilder {
+	s.proof = v
+	return s
+}
+
+func (s *TransferCotaNFTV1EntriesBuilder) WithdrawalProof(v Bytes) *TransferCotaNFTV1EntriesBuilder {
+	s.withdrawal_proof = v
+	return s
+}
+
+func (s *TransferCotaNFTV1EntriesBuilder) Action(v Bytes) *TransferCotaNFTV1EntriesBuilder {
+	s.action = v
+	return s
+}
+
+func NewTransferCotaNFTV1EntriesBuilder() *TransferCotaNFTV1EntriesBuilder {
+	return &TransferCotaNFTV1EntriesBuilder{claim_keys: ClaimCotaNFTKeyVecDefault(), claim_values: ClaimCotaNFTValueVecDefault(), withdrawal_keys: WithdrawalCotaNFTKeyV1VecDefault(), withdrawal_values: WithdrawalCotaNFTValueV1VecDefault(), proof: BytesDefault(), withdrawal_proof: BytesDefault(), action: BytesDefault()}
+}
+
+type TransferCotaNFTV1Entries struct {
+	inner []byte
+}
+
+func TransferCotaNFTV1EntriesFromSliceUnchecked(slice []byte) *TransferCotaNFTV1Entries {
+	return &TransferCotaNFTV1Entries{inner: slice}
+}
+func (s *TransferCotaNFTV1Entries) AsSlice() []byte {
+	return s.inner
+}
+
+func TransferCotaNFTV1EntriesDefault() TransferCotaNFTV1Entries {
+	return *TransferCotaNFTV1EntriesFromSliceUnchecked([]byte{60, 0, 0, 0, 32, 0, 0, 0, 36, 0, 0, 0, 40, 0, 0, 0, 44, 0, 0, 0, 48, 0, 0, 0, 52, 0, 0, 0, 56, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
+}
+
+func TransferCotaNFTV1EntriesFromSlice(slice []byte, compatible bool) (*TransferCotaNFTV1Entries, error) {
+	sliceLen := len(slice)
+	if uint32(sliceLen) < HeaderSizeUint {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "TransferCotaNFTV1Entries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	totalSize := unpackNumber(slice)
+	if Number(sliceLen) != totalSize {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "TransferCotaNFTV1Entries", strconv.Itoa(int(sliceLen)), "!=", strconv.Itoa(int(totalSize))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if uint32(sliceLen) == HeaderSizeUint && 7 == 0 {
+		return &TransferCotaNFTV1Entries{inner: slice}, nil
+	}
+
+	if uint32(sliceLen) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "TransferCotaNFTV1Entries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	offsetFirst := unpackNumber(slice[HeaderSizeUint:])
+	if uint32(offsetFirst)%HeaderSizeUint != 0 || uint32(offsetFirst) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"OffsetsNotMatch", "TransferCotaNFTV1Entries", strconv.Itoa(int(offsetFirst % 4)), "!= 0", strconv.Itoa(int(offsetFirst)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if sliceLen < int(offsetFirst) {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "TransferCotaNFTV1Entries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(offsetFirst))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	fieldCount := uint32(offsetFirst)/HeaderSizeUint - 1
+	if fieldCount < 7 {
+		return nil, errors.New("FieldCountNotMatch")
+	} else if !compatible && fieldCount > 7 {
+		return nil, errors.New("FieldCountNotMatch")
+	}
+
+	offsets := make([]uint32, fieldCount)
+
+	for i := 0; i < int(fieldCount); i++ {
+		offsets[i] = uint32(unpackNumber(slice[HeaderSizeUint:][int(HeaderSizeUint)*i:]))
+	}
+	offsets = append(offsets, uint32(totalSize))
+
+	for i := 0; i < len(offsets); i++ {
+		if i&1 != 0 && offsets[i-1] > offsets[i] {
+			return nil, errors.New("OffsetsNotMatch")
+		}
+	}
+
+	var err error
+
+	_, err = ClaimCotaNFTKeyVecFromSlice(slice[offsets[0]:offsets[1]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = ClaimCotaNFTValueVecFromSlice(slice[offsets[1]:offsets[2]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = WithdrawalCotaNFTKeyV1VecFromSlice(slice[offsets[2]:offsets[3]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = WithdrawalCotaNFTValueV1VecFromSlice(slice[offsets[3]:offsets[4]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[4]:offsets[5]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[5]:offsets[6]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[6]:offsets[7]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	return &TransferCotaNFTV1Entries{inner: slice}, nil
+}
+
+func (s *TransferCotaNFTV1Entries) TotalSize() uint {
+	return uint(unpackNumber(s.inner))
+}
+func (s *TransferCotaNFTV1Entries) FieldCount() uint {
+	var number uint = 0
+	if uint32(s.TotalSize()) == HeaderSizeUint {
+		return number
+	}
+	number = uint(unpackNumber(s.inner[HeaderSizeUint:]))/4 - 1
+	return number
+}
+func (s *TransferCotaNFTV1Entries) Len() uint {
+	return s.FieldCount()
+}
+func (s *TransferCotaNFTV1Entries) IsEmpty() bool {
+	return s.Len() == 0
+}
+func (s *TransferCotaNFTV1Entries) CountExtraFields() uint {
+	return s.FieldCount() - 7
+}
+
+func (s *TransferCotaNFTV1Entries) HasExtraFields() bool {
+	return 7 != s.FieldCount()
+}
+
+func (s *TransferCotaNFTV1Entries) ClaimKeys() *ClaimCotaNFTKeyVec {
+	start := unpackNumber(s.inner[4:])
+	end := unpackNumber(s.inner[8:])
+	return ClaimCotaNFTKeyVecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferCotaNFTV1Entries) ClaimValues() *ClaimCotaNFTValueVec {
+	start := unpackNumber(s.inner[8:])
+	end := unpackNumber(s.inner[12:])
+	return ClaimCotaNFTValueVecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferCotaNFTV1Entries) WithdrawalKeys() *WithdrawalCotaNFTKeyV1Vec {
+	start := unpackNumber(s.inner[12:])
+	end := unpackNumber(s.inner[16:])
+	return WithdrawalCotaNFTKeyV1VecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferCotaNFTV1Entries) WithdrawalValues() *WithdrawalCotaNFTValueV1Vec {
+	start := unpackNumber(s.inner[16:])
+	end := unpackNumber(s.inner[20:])
+	return WithdrawalCotaNFTValueV1VecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferCotaNFTV1Entries) Proof() *Bytes {
+	start := unpackNumber(s.inner[20:])
+	end := unpackNumber(s.inner[24:])
+	return BytesFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferCotaNFTV1Entries) WithdrawalProof() *Bytes {
+	start := unpackNumber(s.inner[24:])
+	end := unpackNumber(s.inner[28:])
+	return BytesFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferCotaNFTV1Entries) Action() *Bytes {
+	var ret *Bytes
+	start := unpackNumber(s.inner[28:])
+	if s.HasExtraFields() {
+		end := unpackNumber(s.inner[32:])
+		ret = BytesFromSliceUnchecked(s.inner[start:end])
+	} else {
+		ret = BytesFromSliceUnchecked(s.inner[start:])
+	}
+	return ret
+}
+
+func (s *TransferCotaNFTV1Entries) AsBuilder() TransferCotaNFTV1EntriesBuilder {
+	ret := NewTransferCotaNFTV1EntriesBuilder().ClaimKeys(*s.ClaimKeys()).ClaimValues(*s.ClaimValues()).WithdrawalKeys(*s.WithdrawalKeys()).WithdrawalValues(*s.WithdrawalValues()).Proof(*s.Proof()).WithdrawalProof(*s.WithdrawalProof()).Action(*s.Action())
+	return *ret
+}
+
+type TransferUpdateCotaNFTV1EntriesBuilder struct {
+	claim_keys        ClaimCotaNFTKeyVec
+	claim_infos       ClaimCotaNFTInfoVec
+	withdrawal_keys   WithdrawalCotaNFTKeyV1Vec
+	withdrawal_values WithdrawalCotaNFTValueV1Vec
+	proof             Bytes
+	withdrawal_proof  Bytes
+	action            Bytes
+}
+
+func (s *TransferUpdateCotaNFTV1EntriesBuilder) Build() TransferUpdateCotaNFTV1Entries {
+	b := new(bytes.Buffer)
+
+	totalSize := HeaderSizeUint * (7 + 1)
+	offsets := make([]uint32, 0, 7)
+
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.claim_keys.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.claim_infos.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.withdrawal_keys.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.withdrawal_values.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.proof.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.withdrawal_proof.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.action.AsSlice()))
+
+	b.Write(packNumber(Number(totalSize)))
+
+	for i := 0; i < len(offsets); i++ {
+		b.Write(packNumber(Number(offsets[i])))
+	}
+
+	b.Write(s.claim_keys.AsSlice())
+	b.Write(s.claim_infos.AsSlice())
+	b.Write(s.withdrawal_keys.AsSlice())
+	b.Write(s.withdrawal_values.AsSlice())
+	b.Write(s.proof.AsSlice())
+	b.Write(s.withdrawal_proof.AsSlice())
+	b.Write(s.action.AsSlice())
+	return TransferUpdateCotaNFTV1Entries{inner: b.Bytes()}
+}
+
+func (s *TransferUpdateCotaNFTV1EntriesBuilder) ClaimKeys(v ClaimCotaNFTKeyVec) *TransferUpdateCotaNFTV1EntriesBuilder {
+	s.claim_keys = v
+	return s
+}
+
+func (s *TransferUpdateCotaNFTV1EntriesBuilder) ClaimInfos(v ClaimCotaNFTInfoVec) *TransferUpdateCotaNFTV1EntriesBuilder {
+	s.claim_infos = v
+	return s
+}
+
+func (s *TransferUpdateCotaNFTV1EntriesBuilder) WithdrawalKeys(v WithdrawalCotaNFTKeyV1Vec) *TransferUpdateCotaNFTV1EntriesBuilder {
+	s.withdrawal_keys = v
+	return s
+}
+
+func (s *TransferUpdateCotaNFTV1EntriesBuilder) WithdrawalValues(v WithdrawalCotaNFTValueV1Vec) *TransferUpdateCotaNFTV1EntriesBuilder {
+	s.withdrawal_values = v
+	return s
+}
+
+func (s *TransferUpdateCotaNFTV1EntriesBuilder) Proof(v Bytes) *TransferUpdateCotaNFTV1EntriesBuilder {
+	s.proof = v
+	return s
+}
+
+func (s *TransferUpdateCotaNFTV1EntriesBuilder) WithdrawalProof(v Bytes) *TransferUpdateCotaNFTV1EntriesBuilder {
+	s.withdrawal_proof = v
+	return s
+}
+
+func (s *TransferUpdateCotaNFTV1EntriesBuilder) Action(v Bytes) *TransferUpdateCotaNFTV1EntriesBuilder {
+	s.action = v
+	return s
+}
+
+func NewTransferUpdateCotaNFTV1EntriesBuilder() *TransferUpdateCotaNFTV1EntriesBuilder {
+	return &TransferUpdateCotaNFTV1EntriesBuilder{claim_keys: ClaimCotaNFTKeyVecDefault(), claim_infos: ClaimCotaNFTInfoVecDefault(), withdrawal_keys: WithdrawalCotaNFTKeyV1VecDefault(), withdrawal_values: WithdrawalCotaNFTValueV1VecDefault(), proof: BytesDefault(), withdrawal_proof: BytesDefault(), action: BytesDefault()}
+}
+
+type TransferUpdateCotaNFTV1Entries struct {
+	inner []byte
+}
+
+func TransferUpdateCotaNFTV1EntriesFromSliceUnchecked(slice []byte) *TransferUpdateCotaNFTV1Entries {
+	return &TransferUpdateCotaNFTV1Entries{inner: slice}
+}
+func (s *TransferUpdateCotaNFTV1Entries) AsSlice() []byte {
+	return s.inner
+}
+
+func TransferUpdateCotaNFTV1EntriesDefault() TransferUpdateCotaNFTV1Entries {
+	return *TransferUpdateCotaNFTV1EntriesFromSliceUnchecked([]byte{60, 0, 0, 0, 32, 0, 0, 0, 36, 0, 0, 0, 40, 0, 0, 0, 44, 0, 0, 0, 48, 0, 0, 0, 52, 0, 0, 0, 56, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
+}
+
+func TransferUpdateCotaNFTV1EntriesFromSlice(slice []byte, compatible bool) (*TransferUpdateCotaNFTV1Entries, error) {
+	sliceLen := len(slice)
+	if uint32(sliceLen) < HeaderSizeUint {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "TransferUpdateCotaNFTV1Entries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	totalSize := unpackNumber(slice)
+	if Number(sliceLen) != totalSize {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "TransferUpdateCotaNFTV1Entries", strconv.Itoa(int(sliceLen)), "!=", strconv.Itoa(int(totalSize))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if uint32(sliceLen) == HeaderSizeUint && 7 == 0 {
+		return &TransferUpdateCotaNFTV1Entries{inner: slice}, nil
+	}
+
+	if uint32(sliceLen) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "TransferUpdateCotaNFTV1Entries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	offsetFirst := unpackNumber(slice[HeaderSizeUint:])
+	if uint32(offsetFirst)%HeaderSizeUint != 0 || uint32(offsetFirst) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"OffsetsNotMatch", "TransferUpdateCotaNFTV1Entries", strconv.Itoa(int(offsetFirst % 4)), "!= 0", strconv.Itoa(int(offsetFirst)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if sliceLen < int(offsetFirst) {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "TransferUpdateCotaNFTV1Entries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(offsetFirst))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	fieldCount := uint32(offsetFirst)/HeaderSizeUint - 1
+	if fieldCount < 7 {
+		return nil, errors.New("FieldCountNotMatch")
+	} else if !compatible && fieldCount > 7 {
+		return nil, errors.New("FieldCountNotMatch")
+	}
+
+	offsets := make([]uint32, fieldCount)
+
+	for i := 0; i < int(fieldCount); i++ {
+		offsets[i] = uint32(unpackNumber(slice[HeaderSizeUint:][int(HeaderSizeUint)*i:]))
+	}
+	offsets = append(offsets, uint32(totalSize))
+
+	for i := 0; i < len(offsets); i++ {
+		if i&1 != 0 && offsets[i-1] > offsets[i] {
+			return nil, errors.New("OffsetsNotMatch")
+		}
+	}
+
+	var err error
+
+	_, err = ClaimCotaNFTKeyVecFromSlice(slice[offsets[0]:offsets[1]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = ClaimCotaNFTInfoVecFromSlice(slice[offsets[1]:offsets[2]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = WithdrawalCotaNFTKeyV1VecFromSlice(slice[offsets[2]:offsets[3]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = WithdrawalCotaNFTValueV1VecFromSlice(slice[offsets[3]:offsets[4]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[4]:offsets[5]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[5]:offsets[6]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[6]:offsets[7]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	return &TransferUpdateCotaNFTV1Entries{inner: slice}, nil
+}
+
+func (s *TransferUpdateCotaNFTV1Entries) TotalSize() uint {
+	return uint(unpackNumber(s.inner))
+}
+func (s *TransferUpdateCotaNFTV1Entries) FieldCount() uint {
+	var number uint = 0
+	if uint32(s.TotalSize()) == HeaderSizeUint {
+		return number
+	}
+	number = uint(unpackNumber(s.inner[HeaderSizeUint:]))/4 - 1
+	return number
+}
+func (s *TransferUpdateCotaNFTV1Entries) Len() uint {
+	return s.FieldCount()
+}
+func (s *TransferUpdateCotaNFTV1Entries) IsEmpty() bool {
+	return s.Len() == 0
+}
+func (s *TransferUpdateCotaNFTV1Entries) CountExtraFields() uint {
+	return s.FieldCount() - 7
+}
+
+func (s *TransferUpdateCotaNFTV1Entries) HasExtraFields() bool {
+	return 7 != s.FieldCount()
+}
+
+func (s *TransferUpdateCotaNFTV1Entries) ClaimKeys() *ClaimCotaNFTKeyVec {
+	start := unpackNumber(s.inner[4:])
+	end := unpackNumber(s.inner[8:])
+	return ClaimCotaNFTKeyVecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferUpdateCotaNFTV1Entries) ClaimInfos() *ClaimCotaNFTInfoVec {
+	start := unpackNumber(s.inner[8:])
+	end := unpackNumber(s.inner[12:])
+	return ClaimCotaNFTInfoVecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferUpdateCotaNFTV1Entries) WithdrawalKeys() *WithdrawalCotaNFTKeyV1Vec {
+	start := unpackNumber(s.inner[12:])
+	end := unpackNumber(s.inner[16:])
+	return WithdrawalCotaNFTKeyV1VecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferUpdateCotaNFTV1Entries) WithdrawalValues() *WithdrawalCotaNFTValueV1Vec {
+	start := unpackNumber(s.inner[16:])
+	end := unpackNumber(s.inner[20:])
+	return WithdrawalCotaNFTValueV1VecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferUpdateCotaNFTV1Entries) Proof() *Bytes {
+	start := unpackNumber(s.inner[20:])
+	end := unpackNumber(s.inner[24:])
+	return BytesFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferUpdateCotaNFTV1Entries) WithdrawalProof() *Bytes {
+	start := unpackNumber(s.inner[24:])
+	end := unpackNumber(s.inner[28:])
+	return BytesFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferUpdateCotaNFTV1Entries) Action() *Bytes {
+	var ret *Bytes
+	start := unpackNumber(s.inner[28:])
+	if s.HasExtraFields() {
+		end := unpackNumber(s.inner[32:])
+		ret = BytesFromSliceUnchecked(s.inner[start:end])
+	} else {
+		ret = BytesFromSliceUnchecked(s.inner[start:])
+	}
+	return ret
+}
+
+func (s *TransferUpdateCotaNFTV1Entries) AsBuilder() TransferUpdateCotaNFTV1EntriesBuilder {
+	ret := NewTransferUpdateCotaNFTV1EntriesBuilder().ClaimKeys(*s.ClaimKeys()).ClaimInfos(*s.ClaimInfos()).WithdrawalKeys(*s.WithdrawalKeys()).WithdrawalValues(*s.WithdrawalValues()).Proof(*s.Proof()).WithdrawalProof(*s.WithdrawalProof()).Action(*s.Action())
+	return *ret
+}
