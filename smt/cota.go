@@ -4286,8 +4286,73 @@ func (s *ClaimCotaNFTValueVec) AsBuilder() ClaimCotaNFTValueVecBuilder {
 	return *t
 }
 
+type ClaimCotaNFTInfoBuilder struct {
+	version  Byte
+	nft_info CotaNFTInfo
+}
+
+func (s *ClaimCotaNFTInfoBuilder) Build() ClaimCotaNFTInfo {
+	b := new(bytes.Buffer)
+	b.Write(s.version.AsSlice())
+	b.Write(s.nft_info.AsSlice())
+	return ClaimCotaNFTInfo{inner: b.Bytes()}
+}
+
+func (s *ClaimCotaNFTInfoBuilder) Version(v Byte) *ClaimCotaNFTInfoBuilder {
+	s.version = v
+	return s
+}
+
+func (s *ClaimCotaNFTInfoBuilder) NftInfo(v CotaNFTInfo) *ClaimCotaNFTInfoBuilder {
+	s.nft_info = v
+	return s
+}
+
+func NewClaimCotaNFTInfoBuilder() *ClaimCotaNFTInfoBuilder {
+	return &ClaimCotaNFTInfoBuilder{version: ByteDefault(), nft_info: CotaNFTInfoDefault()}
+}
+
+type ClaimCotaNFTInfo struct {
+	inner []byte
+}
+
+func ClaimCotaNFTInfoFromSliceUnchecked(slice []byte) *ClaimCotaNFTInfo {
+	return &ClaimCotaNFTInfo{inner: slice}
+}
+func (s *ClaimCotaNFTInfo) AsSlice() []byte {
+	return s.inner
+}
+
+func ClaimCotaNFTInfoDefault() ClaimCotaNFTInfo {
+	return *ClaimCotaNFTInfoFromSliceUnchecked([]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
+}
+
+func ClaimCotaNFTInfoFromSlice(slice []byte, _compatible bool) (*ClaimCotaNFTInfo, error) {
+	sliceLen := len(slice)
+	if sliceLen != 23 {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "ClaimCotaNFTInfo", strconv.Itoa(int(sliceLen)), "!=", strconv.Itoa(23)}, " ")
+		return nil, errors.New(errMsg)
+	}
+	return &ClaimCotaNFTInfo{inner: slice}, nil
+}
+
+func (s *ClaimCotaNFTInfo) Version() *Byte {
+	ret := ByteFromSliceUnchecked(s.inner[0:1])
+	return ret
+}
+
+func (s *ClaimCotaNFTInfo) NftInfo() *CotaNFTInfo {
+	ret := CotaNFTInfoFromSliceUnchecked(s.inner[1:23])
+	return ret
+}
+
+func (s *ClaimCotaNFTInfo) AsBuilder() ClaimCotaNFTInfoBuilder {
+	ret := NewClaimCotaNFTInfoBuilder().Version(*s.Version()).NftInfo(*s.NftInfo())
+	return *ret
+}
+
 type ClaimCotaNFTInfoVecBuilder struct {
-	inner []CotaNFTInfo
+	inner []ClaimCotaNFTInfo
 }
 
 func (s *ClaimCotaNFTInfoVecBuilder) Build() ClaimCotaNFTInfoVec {
@@ -4306,21 +4371,21 @@ func (s *ClaimCotaNFTInfoVecBuilder) Build() ClaimCotaNFTInfoVec {
 	return sb
 }
 
-func (s *ClaimCotaNFTInfoVecBuilder) Set(v []CotaNFTInfo) *ClaimCotaNFTInfoVecBuilder {
+func (s *ClaimCotaNFTInfoVecBuilder) Set(v []ClaimCotaNFTInfo) *ClaimCotaNFTInfoVecBuilder {
 	s.inner = v
 	return s
 }
-func (s *ClaimCotaNFTInfoVecBuilder) Push(v CotaNFTInfo) *ClaimCotaNFTInfoVecBuilder {
+func (s *ClaimCotaNFTInfoVecBuilder) Push(v ClaimCotaNFTInfo) *ClaimCotaNFTInfoVecBuilder {
 	s.inner = append(s.inner, v)
 	return s
 }
-func (s *ClaimCotaNFTInfoVecBuilder) Extend(iter []CotaNFTInfo) *ClaimCotaNFTInfoVecBuilder {
+func (s *ClaimCotaNFTInfoVecBuilder) Extend(iter []ClaimCotaNFTInfo) *ClaimCotaNFTInfoVecBuilder {
 	for i := 0; i < len(iter); i++ {
 		s.inner = append(s.inner, iter[i])
 	}
 	return s
 }
-func (s *ClaimCotaNFTInfoVecBuilder) Replace(index uint, v CotaNFTInfo) *CotaNFTInfo {
+func (s *ClaimCotaNFTInfoVecBuilder) Replace(index uint, v ClaimCotaNFTInfo) *ClaimCotaNFTInfo {
 	if uint(len(s.inner)) > index {
 		a := s.inner[index]
 		s.inner[index] = v
@@ -4330,7 +4395,7 @@ func (s *ClaimCotaNFTInfoVecBuilder) Replace(index uint, v CotaNFTInfo) *CotaNFT
 }
 
 func NewClaimCotaNFTInfoVecBuilder() *ClaimCotaNFTInfoVecBuilder {
-	return &ClaimCotaNFTInfoVecBuilder{[]CotaNFTInfo{}}
+	return &ClaimCotaNFTInfoVecBuilder{[]ClaimCotaNFTInfo{}}
 }
 
 type ClaimCotaNFTInfoVec struct {
@@ -4362,7 +4427,7 @@ func ClaimCotaNFTInfoVecFromSlice(slice []byte, _compatible bool) (*ClaimCotaNFT
 		}
 		return &ClaimCotaNFTInfoVec{inner: slice}, nil
 	}
-	totalSize := int(HeaderSizeUint) + int(22*itemCount)
+	totalSize := int(HeaderSizeUint) + int(23*itemCount)
 	if sliceLen != totalSize {
 		errMsg := strings.Join([]string{"TotalSizeNotMatch", "ClaimCotaNFTInfoVec", strconv.Itoa(int(sliceLen)), "!=", strconv.Itoa(int(totalSize))}, " ")
 		return nil, errors.New(errMsg)
@@ -4371,7 +4436,7 @@ func ClaimCotaNFTInfoVecFromSlice(slice []byte, _compatible bool) (*ClaimCotaNFT
 }
 
 func (s *ClaimCotaNFTInfoVec) TotalSize() uint {
-	return uint(HeaderSizeUint) + 22*s.ItemCount()
+	return uint(HeaderSizeUint) + 23*s.ItemCount()
 }
 func (s *ClaimCotaNFTInfoVec) ItemCount() uint {
 	number := uint(unpackNumber(s.inner))
@@ -4384,13 +4449,13 @@ func (s *ClaimCotaNFTInfoVec) IsEmpty() bool {
 	return s.Len() == 0
 }
 
-// if *CotaNFTInfo is nil, index is out of bounds
-func (s *ClaimCotaNFTInfoVec) Get(index uint) *CotaNFTInfo {
-	var re *CotaNFTInfo
+// if *ClaimCotaNFTInfo is nil, index is out of bounds
+func (s *ClaimCotaNFTInfoVec) Get(index uint) *ClaimCotaNFTInfo {
+	var re *ClaimCotaNFTInfo
 	if index < s.Len() {
-		start := uint(HeaderSizeUint) + 22*index
-		end := start + 22
-		re = CotaNFTInfoFromSliceUnchecked(s.inner[start:end])
+		start := uint(HeaderSizeUint) + 23*index
+		end := start + 23
+		re = ClaimCotaNFTInfoFromSliceUnchecked(s.inner[start:end])
 	}
 	return re
 }
