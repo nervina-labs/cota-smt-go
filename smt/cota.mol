@@ -24,7 +24,6 @@ vector HoldCotaNFTKeyVec <CotaNFTId>;
 
 vector HoldCotaNFTValueVec <CotaNFTInfo>;
 
-
 // registry
 struct Registry {
   lockHash: Byte32,
@@ -37,7 +36,6 @@ table CotaNFTRegistryEntries {
   registries: RegistryVec,
   proof: Bytes,
 }
-
 
 // define
 struct DefineCotaNFTId {
@@ -62,7 +60,6 @@ table DefineCotaNFTEntries {
   action: Bytes,
 }
 
-
 // mint
 table MintCotaNFTEntries {
   defineKeys: DefineCotaNFTKeyVec,
@@ -73,7 +70,6 @@ table MintCotaNFTEntries {
   proof: Bytes,
   action: Bytes,
 }
-
 
 // transfer
 vector WithdrawalCotaNFTKeyVec <CotaNFTId>;
@@ -95,7 +91,6 @@ table WithdrawalCotaNFTEntries {
   action: Bytes,
 }
 
-
 struct ClaimCotaNFTKey {
   nftId: CotaNFTId,
   outPoint: OutPointSlice,
@@ -105,7 +100,11 @@ vector ClaimCotaNFTKeyVec <ClaimCotaNFTKey>;
 
 vector ClaimCotaNFTValueVec <Byte32>;
 
-vector ClaimCotaNFTInfoVec <CotaNFTInfo>;
+struct ClaimCotaNFTInfo {
+  version: byte,
+  nft_info: CotaNFTInfo,
+}
+vector ClaimCotaNFTInfoVec <ClaimCotaNFTInfo>;
 
 table ClaimCotaNFTEntries {
   holdKeys: HoldCotaNFTKeyVec,
@@ -147,12 +146,63 @@ table TransferUpdateCotaNFTEntries {
   action: Bytes,
 }
 
-
 // update
 table UpdateCotaNFTEntries {
   holdKeys: HoldCotaNFTKeyVec,
   holdOldValues: HoldCotaNFTValueVec,
   holdNewValues: HoldCotaNFTValueVec,
   proof: Bytes,
+  action: Bytes,
+}
+
+// V1
+struct WithdrawalCotaNFTKeyV1 {
+  nft_id: CotaNFTId,
+  out_point: OutPointSlice,
+}
+vector WithdrawalCotaNFTKeyV1Vec <WithdrawalCotaNFTKeyV1>;
+
+table WithdrawalCotaNFTValueV1 {
+  nft_info: CotaNFTInfo,
+  to_lock: Bytes,
+}
+vector WithdrawalCotaNFTValueV1Vec <WithdrawalCotaNFTValueV1>;
+
+table MintCotaNFTV1Entries {
+  define_keys: DefineCotaNFTKeyVec,
+  define_old_values: DefineCotaNFTValueVec,
+  define_new_values: DefineCotaNFTValueVec,
+  withdrawal_keys: WithdrawalCotaNFTKeyV1Vec,
+  withdrawal_values: WithdrawalCotaNFTValueV1Vec,
+  proof: Bytes,
+  action: Bytes,
+}
+
+table WithdrawalCotaNFTV1Entries {
+  hold_keys: HoldCotaNFTKeyVec,
+  hold_values: HoldCotaNFTValueVec,
+  withdrawal_keys: WithdrawalCotaNFTKeyV1Vec,
+  withdrawal_values: WithdrawalCotaNFTValueV1Vec,
+  proof: Bytes,
+  action: Bytes,
+}
+
+table TransferCotaNFTV1Entries {
+  claim_keys: ClaimCotaNFTKeyVec,
+  claim_values: ClaimCotaNFTValueVec,
+  withdrawal_keys: WithdrawalCotaNFTKeyV1Vec,
+  withdrawal_values: WithdrawalCotaNFTValueV1Vec,
+  proof: Bytes,
+  withdrawal_proof: Bytes,
+  action: Bytes,
+}
+
+table TransferUpdateCotaNFTV1Entries {
+  claim_keys: ClaimCotaNFTKeyVec,
+  claim_infos: ClaimCotaNFTInfoVec,
+  withdrawal_keys: WithdrawalCotaNFTKeyV1Vec,
+  withdrawal_values: WithdrawalCotaNFTValueV1Vec,
+  proof: Bytes,
+  withdrawal_proof: Bytes,
   action: Bytes,
 }
