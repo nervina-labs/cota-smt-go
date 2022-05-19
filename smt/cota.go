@@ -7989,9 +7989,9 @@ type ClaimCotaNFTV2EntriesBuilder struct {
 	claim_values     ClaimCotaNFTValueVec
 	proof            Bytes
 	action           Bytes
+	withdrawal_proof Bytes
 	leaf_keys        Byte32Vec
 	leaf_values      Byte32Vec
-	withdrawal_proof Bytes
 	raw_tx           Bytes
 	tx_proof         TransactionProof
 }
@@ -8015,11 +8015,11 @@ func (s *ClaimCotaNFTV2EntriesBuilder) Build() ClaimCotaNFTV2Entries {
 	offsets = append(offsets, totalSize)
 	totalSize += uint32(len(s.action.AsSlice()))
 	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.withdrawal_proof.AsSlice()))
+	offsets = append(offsets, totalSize)
 	totalSize += uint32(len(s.leaf_keys.AsSlice()))
 	offsets = append(offsets, totalSize)
 	totalSize += uint32(len(s.leaf_values.AsSlice()))
-	offsets = append(offsets, totalSize)
-	totalSize += uint32(len(s.withdrawal_proof.AsSlice()))
 	offsets = append(offsets, totalSize)
 	totalSize += uint32(len(s.raw_tx.AsSlice()))
 	offsets = append(offsets, totalSize)
@@ -8037,9 +8037,9 @@ func (s *ClaimCotaNFTV2EntriesBuilder) Build() ClaimCotaNFTV2Entries {
 	b.Write(s.claim_values.AsSlice())
 	b.Write(s.proof.AsSlice())
 	b.Write(s.action.AsSlice())
+	b.Write(s.withdrawal_proof.AsSlice())
 	b.Write(s.leaf_keys.AsSlice())
 	b.Write(s.leaf_values.AsSlice())
-	b.Write(s.withdrawal_proof.AsSlice())
 	b.Write(s.raw_tx.AsSlice())
 	b.Write(s.tx_proof.AsSlice())
 	return ClaimCotaNFTV2Entries{inner: b.Bytes()}
@@ -8075,6 +8075,11 @@ func (s *ClaimCotaNFTV2EntriesBuilder) Action(v Bytes) *ClaimCotaNFTV2EntriesBui
 	return s
 }
 
+func (s *ClaimCotaNFTV2EntriesBuilder) WithdrawalProof(v Bytes) *ClaimCotaNFTV2EntriesBuilder {
+	s.withdrawal_proof = v
+	return s
+}
+
 func (s *ClaimCotaNFTV2EntriesBuilder) LeafKeys(v Byte32Vec) *ClaimCotaNFTV2EntriesBuilder {
 	s.leaf_keys = v
 	return s
@@ -8082,11 +8087,6 @@ func (s *ClaimCotaNFTV2EntriesBuilder) LeafKeys(v Byte32Vec) *ClaimCotaNFTV2Entr
 
 func (s *ClaimCotaNFTV2EntriesBuilder) LeafValues(v Byte32Vec) *ClaimCotaNFTV2EntriesBuilder {
 	s.leaf_values = v
-	return s
-}
-
-func (s *ClaimCotaNFTV2EntriesBuilder) WithdrawalProof(v Bytes) *ClaimCotaNFTV2EntriesBuilder {
-	s.withdrawal_proof = v
 	return s
 }
 
@@ -8101,7 +8101,7 @@ func (s *ClaimCotaNFTV2EntriesBuilder) TxProof(v TransactionProof) *ClaimCotaNFT
 }
 
 func NewClaimCotaNFTV2EntriesBuilder() *ClaimCotaNFTV2EntriesBuilder {
-	return &ClaimCotaNFTV2EntriesBuilder{hold_keys: HoldCotaNFTKeyVecDefault(), hold_values: HoldCotaNFTValueVecDefault(), claim_keys: ClaimCotaNFTKeyVecDefault(), claim_values: ClaimCotaNFTValueVecDefault(), proof: BytesDefault(), action: BytesDefault(), leaf_keys: Byte32VecDefault(), leaf_values: Byte32VecDefault(), withdrawal_proof: BytesDefault(), raw_tx: BytesDefault(), tx_proof: TransactionProofDefault()}
+	return &ClaimCotaNFTV2EntriesBuilder{hold_keys: HoldCotaNFTKeyVecDefault(), hold_values: HoldCotaNFTValueVecDefault(), claim_keys: ClaimCotaNFTKeyVecDefault(), claim_values: ClaimCotaNFTValueVecDefault(), proof: BytesDefault(), action: BytesDefault(), withdrawal_proof: BytesDefault(), leaf_keys: Byte32VecDefault(), leaf_values: Byte32VecDefault(), raw_tx: BytesDefault(), tx_proof: TransactionProofDefault()}
 }
 
 type ClaimCotaNFTV2Entries struct {
@@ -8204,7 +8204,7 @@ func ClaimCotaNFTV2EntriesFromSlice(slice []byte, compatible bool) (*ClaimCotaNF
 		return nil, err
 	}
 
-	_, err = Byte32VecFromSlice(slice[offsets[6]:offsets[7]], compatible)
+	_, err = BytesFromSlice(slice[offsets[6]:offsets[7]], compatible)
 	if err != nil {
 		return nil, err
 	}
@@ -8214,7 +8214,7 @@ func ClaimCotaNFTV2EntriesFromSlice(slice []byte, compatible bool) (*ClaimCotaNF
 		return nil, err
 	}
 
-	_, err = BytesFromSlice(slice[offsets[8]:offsets[9]], compatible)
+	_, err = Byte32VecFromSlice(slice[offsets[8]:offsets[9]], compatible)
 	if err != nil {
 		return nil, err
 	}
@@ -8293,22 +8293,22 @@ func (s *ClaimCotaNFTV2Entries) Action() *Bytes {
 	return BytesFromSliceUnchecked(s.inner[start:end])
 }
 
-func (s *ClaimCotaNFTV2Entries) LeafKeys() *Byte32Vec {
+func (s *ClaimCotaNFTV2Entries) WithdrawalProof() *Bytes {
 	start := unpackNumber(s.inner[28:])
 	end := unpackNumber(s.inner[32:])
-	return Byte32VecFromSliceUnchecked(s.inner[start:end])
+	return BytesFromSliceUnchecked(s.inner[start:end])
 }
 
-func (s *ClaimCotaNFTV2Entries) LeafValues() *Byte32Vec {
+func (s *ClaimCotaNFTV2Entries) LeafKeys() *Byte32Vec {
 	start := unpackNumber(s.inner[32:])
 	end := unpackNumber(s.inner[36:])
 	return Byte32VecFromSliceUnchecked(s.inner[start:end])
 }
 
-func (s *ClaimCotaNFTV2Entries) WithdrawalProof() *Bytes {
+func (s *ClaimCotaNFTV2Entries) LeafValues() *Byte32Vec {
 	start := unpackNumber(s.inner[36:])
 	end := unpackNumber(s.inner[40:])
-	return BytesFromSliceUnchecked(s.inner[start:end])
+	return Byte32VecFromSliceUnchecked(s.inner[start:end])
 }
 
 func (s *ClaimCotaNFTV2Entries) RawTx() *Bytes {
@@ -8330,7 +8330,7 @@ func (s *ClaimCotaNFTV2Entries) TxProof() *TransactionProof {
 }
 
 func (s *ClaimCotaNFTV2Entries) AsBuilder() ClaimCotaNFTV2EntriesBuilder {
-	ret := NewClaimCotaNFTV2EntriesBuilder().HoldKeys(*s.HoldKeys()).HoldValues(*s.HoldValues()).ClaimKeys(*s.ClaimKeys()).ClaimValues(*s.ClaimValues()).Proof(*s.Proof()).Action(*s.Action()).LeafKeys(*s.LeafKeys()).LeafValues(*s.LeafValues()).WithdrawalProof(*s.WithdrawalProof()).RawTx(*s.RawTx()).TxProof(*s.TxProof())
+	ret := NewClaimCotaNFTV2EntriesBuilder().HoldKeys(*s.HoldKeys()).HoldValues(*s.HoldValues()).ClaimKeys(*s.ClaimKeys()).ClaimValues(*s.ClaimValues()).Proof(*s.Proof()).Action(*s.Action()).WithdrawalProof(*s.WithdrawalProof()).LeafKeys(*s.LeafKeys()).LeafValues(*s.LeafValues()).RawTx(*s.RawTx()).TxProof(*s.TxProof())
 	return *ret
 }
 
@@ -8341,9 +8341,9 @@ type TransferCotaNFTV2EntriesBuilder struct {
 	withdrawal_values WithdrawalCotaNFTValueV1Vec
 	proof             Bytes
 	action            Bytes
+	withdrawal_proof  Bytes
 	leaf_keys         Byte32Vec
 	leaf_values       Byte32Vec
-	withdrawal_proof  Bytes
 	raw_tx            Bytes
 	tx_proof          TransactionProof
 }
@@ -8367,11 +8367,11 @@ func (s *TransferCotaNFTV2EntriesBuilder) Build() TransferCotaNFTV2Entries {
 	offsets = append(offsets, totalSize)
 	totalSize += uint32(len(s.action.AsSlice()))
 	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.withdrawal_proof.AsSlice()))
+	offsets = append(offsets, totalSize)
 	totalSize += uint32(len(s.leaf_keys.AsSlice()))
 	offsets = append(offsets, totalSize)
 	totalSize += uint32(len(s.leaf_values.AsSlice()))
-	offsets = append(offsets, totalSize)
-	totalSize += uint32(len(s.withdrawal_proof.AsSlice()))
 	offsets = append(offsets, totalSize)
 	totalSize += uint32(len(s.raw_tx.AsSlice()))
 	offsets = append(offsets, totalSize)
@@ -8389,9 +8389,9 @@ func (s *TransferCotaNFTV2EntriesBuilder) Build() TransferCotaNFTV2Entries {
 	b.Write(s.withdrawal_values.AsSlice())
 	b.Write(s.proof.AsSlice())
 	b.Write(s.action.AsSlice())
+	b.Write(s.withdrawal_proof.AsSlice())
 	b.Write(s.leaf_keys.AsSlice())
 	b.Write(s.leaf_values.AsSlice())
-	b.Write(s.withdrawal_proof.AsSlice())
 	b.Write(s.raw_tx.AsSlice())
 	b.Write(s.tx_proof.AsSlice())
 	return TransferCotaNFTV2Entries{inner: b.Bytes()}
@@ -8427,6 +8427,11 @@ func (s *TransferCotaNFTV2EntriesBuilder) Action(v Bytes) *TransferCotaNFTV2Entr
 	return s
 }
 
+func (s *TransferCotaNFTV2EntriesBuilder) WithdrawalProof(v Bytes) *TransferCotaNFTV2EntriesBuilder {
+	s.withdrawal_proof = v
+	return s
+}
+
 func (s *TransferCotaNFTV2EntriesBuilder) LeafKeys(v Byte32Vec) *TransferCotaNFTV2EntriesBuilder {
 	s.leaf_keys = v
 	return s
@@ -8434,11 +8439,6 @@ func (s *TransferCotaNFTV2EntriesBuilder) LeafKeys(v Byte32Vec) *TransferCotaNFT
 
 func (s *TransferCotaNFTV2EntriesBuilder) LeafValues(v Byte32Vec) *TransferCotaNFTV2EntriesBuilder {
 	s.leaf_values = v
-	return s
-}
-
-func (s *TransferCotaNFTV2EntriesBuilder) WithdrawalProof(v Bytes) *TransferCotaNFTV2EntriesBuilder {
-	s.withdrawal_proof = v
 	return s
 }
 
@@ -8453,7 +8453,7 @@ func (s *TransferCotaNFTV2EntriesBuilder) TxProof(v TransactionProof) *TransferC
 }
 
 func NewTransferCotaNFTV2EntriesBuilder() *TransferCotaNFTV2EntriesBuilder {
-	return &TransferCotaNFTV2EntriesBuilder{claim_keys: ClaimCotaNFTKeyVecDefault(), claim_values: ClaimCotaNFTValueVecDefault(), withdrawal_keys: WithdrawalCotaNFTKeyV1VecDefault(), withdrawal_values: WithdrawalCotaNFTValueV1VecDefault(), proof: BytesDefault(), action: BytesDefault(), leaf_keys: Byte32VecDefault(), leaf_values: Byte32VecDefault(), withdrawal_proof: BytesDefault(), raw_tx: BytesDefault(), tx_proof: TransactionProofDefault()}
+	return &TransferCotaNFTV2EntriesBuilder{claim_keys: ClaimCotaNFTKeyVecDefault(), claim_values: ClaimCotaNFTValueVecDefault(), withdrawal_keys: WithdrawalCotaNFTKeyV1VecDefault(), withdrawal_values: WithdrawalCotaNFTValueV1VecDefault(), proof: BytesDefault(), action: BytesDefault(), withdrawal_proof: BytesDefault(), leaf_keys: Byte32VecDefault(), leaf_values: Byte32VecDefault(), raw_tx: BytesDefault(), tx_proof: TransactionProofDefault()}
 }
 
 type TransferCotaNFTV2Entries struct {
@@ -8556,7 +8556,7 @@ func TransferCotaNFTV2EntriesFromSlice(slice []byte, compatible bool) (*Transfer
 		return nil, err
 	}
 
-	_, err = Byte32VecFromSlice(slice[offsets[6]:offsets[7]], compatible)
+	_, err = BytesFromSlice(slice[offsets[6]:offsets[7]], compatible)
 	if err != nil {
 		return nil, err
 	}
@@ -8566,7 +8566,7 @@ func TransferCotaNFTV2EntriesFromSlice(slice []byte, compatible bool) (*Transfer
 		return nil, err
 	}
 
-	_, err = BytesFromSlice(slice[offsets[8]:offsets[9]], compatible)
+	_, err = Byte32VecFromSlice(slice[offsets[8]:offsets[9]], compatible)
 	if err != nil {
 		return nil, err
 	}
@@ -8645,22 +8645,22 @@ func (s *TransferCotaNFTV2Entries) Action() *Bytes {
 	return BytesFromSliceUnchecked(s.inner[start:end])
 }
 
-func (s *TransferCotaNFTV2Entries) LeafKeys() *Byte32Vec {
+func (s *TransferCotaNFTV2Entries) WithdrawalProof() *Bytes {
 	start := unpackNumber(s.inner[28:])
 	end := unpackNumber(s.inner[32:])
-	return Byte32VecFromSliceUnchecked(s.inner[start:end])
+	return BytesFromSliceUnchecked(s.inner[start:end])
 }
 
-func (s *TransferCotaNFTV2Entries) LeafValues() *Byte32Vec {
+func (s *TransferCotaNFTV2Entries) LeafKeys() *Byte32Vec {
 	start := unpackNumber(s.inner[32:])
 	end := unpackNumber(s.inner[36:])
 	return Byte32VecFromSliceUnchecked(s.inner[start:end])
 }
 
-func (s *TransferCotaNFTV2Entries) WithdrawalProof() *Bytes {
+func (s *TransferCotaNFTV2Entries) LeafValues() *Byte32Vec {
 	start := unpackNumber(s.inner[36:])
 	end := unpackNumber(s.inner[40:])
-	return BytesFromSliceUnchecked(s.inner[start:end])
+	return Byte32VecFromSliceUnchecked(s.inner[start:end])
 }
 
 func (s *TransferCotaNFTV2Entries) RawTx() *Bytes {
@@ -8682,7 +8682,7 @@ func (s *TransferCotaNFTV2Entries) TxProof() *TransactionProof {
 }
 
 func (s *TransferCotaNFTV2Entries) AsBuilder() TransferCotaNFTV2EntriesBuilder {
-	ret := NewTransferCotaNFTV2EntriesBuilder().ClaimKeys(*s.ClaimKeys()).ClaimValues(*s.ClaimValues()).WithdrawalKeys(*s.WithdrawalKeys()).WithdrawalValues(*s.WithdrawalValues()).Proof(*s.Proof()).Action(*s.Action()).LeafKeys(*s.LeafKeys()).LeafValues(*s.LeafValues()).WithdrawalProof(*s.WithdrawalProof()).RawTx(*s.RawTx()).TxProof(*s.TxProof())
+	ret := NewTransferCotaNFTV2EntriesBuilder().ClaimKeys(*s.ClaimKeys()).ClaimValues(*s.ClaimValues()).WithdrawalKeys(*s.WithdrawalKeys()).WithdrawalValues(*s.WithdrawalValues()).Proof(*s.Proof()).Action(*s.Action()).WithdrawalProof(*s.WithdrawalProof()).LeafKeys(*s.LeafKeys()).LeafValues(*s.LeafValues()).RawTx(*s.RawTx()).TxProof(*s.TxProof())
 	return *ret
 }
 
@@ -8693,9 +8693,9 @@ type ClaimUpdateCotaNFTV2EntriesBuilder struct {
 	claim_infos      ClaimCotaNFTInfoVec
 	proof            Bytes
 	action           Bytes
+	withdrawal_proof Bytes
 	leaf_keys        Byte32Vec
 	leaf_values      Byte32Vec
-	withdrawal_proof Bytes
 	raw_tx           Bytes
 	tx_proof         TransactionProof
 }
@@ -8719,11 +8719,11 @@ func (s *ClaimUpdateCotaNFTV2EntriesBuilder) Build() ClaimUpdateCotaNFTV2Entries
 	offsets = append(offsets, totalSize)
 	totalSize += uint32(len(s.action.AsSlice()))
 	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.withdrawal_proof.AsSlice()))
+	offsets = append(offsets, totalSize)
 	totalSize += uint32(len(s.leaf_keys.AsSlice()))
 	offsets = append(offsets, totalSize)
 	totalSize += uint32(len(s.leaf_values.AsSlice()))
-	offsets = append(offsets, totalSize)
-	totalSize += uint32(len(s.withdrawal_proof.AsSlice()))
 	offsets = append(offsets, totalSize)
 	totalSize += uint32(len(s.raw_tx.AsSlice()))
 	offsets = append(offsets, totalSize)
@@ -8741,9 +8741,9 @@ func (s *ClaimUpdateCotaNFTV2EntriesBuilder) Build() ClaimUpdateCotaNFTV2Entries
 	b.Write(s.claim_infos.AsSlice())
 	b.Write(s.proof.AsSlice())
 	b.Write(s.action.AsSlice())
+	b.Write(s.withdrawal_proof.AsSlice())
 	b.Write(s.leaf_keys.AsSlice())
 	b.Write(s.leaf_values.AsSlice())
-	b.Write(s.withdrawal_proof.AsSlice())
 	b.Write(s.raw_tx.AsSlice())
 	b.Write(s.tx_proof.AsSlice())
 	return ClaimUpdateCotaNFTV2Entries{inner: b.Bytes()}
@@ -8779,6 +8779,11 @@ func (s *ClaimUpdateCotaNFTV2EntriesBuilder) Action(v Bytes) *ClaimUpdateCotaNFT
 	return s
 }
 
+func (s *ClaimUpdateCotaNFTV2EntriesBuilder) WithdrawalProof(v Bytes) *ClaimUpdateCotaNFTV2EntriesBuilder {
+	s.withdrawal_proof = v
+	return s
+}
+
 func (s *ClaimUpdateCotaNFTV2EntriesBuilder) LeafKeys(v Byte32Vec) *ClaimUpdateCotaNFTV2EntriesBuilder {
 	s.leaf_keys = v
 	return s
@@ -8786,11 +8791,6 @@ func (s *ClaimUpdateCotaNFTV2EntriesBuilder) LeafKeys(v Byte32Vec) *ClaimUpdateC
 
 func (s *ClaimUpdateCotaNFTV2EntriesBuilder) LeafValues(v Byte32Vec) *ClaimUpdateCotaNFTV2EntriesBuilder {
 	s.leaf_values = v
-	return s
-}
-
-func (s *ClaimUpdateCotaNFTV2EntriesBuilder) WithdrawalProof(v Bytes) *ClaimUpdateCotaNFTV2EntriesBuilder {
-	s.withdrawal_proof = v
 	return s
 }
 
@@ -8805,7 +8805,7 @@ func (s *ClaimUpdateCotaNFTV2EntriesBuilder) TxProof(v TransactionProof) *ClaimU
 }
 
 func NewClaimUpdateCotaNFTV2EntriesBuilder() *ClaimUpdateCotaNFTV2EntriesBuilder {
-	return &ClaimUpdateCotaNFTV2EntriesBuilder{hold_keys: HoldCotaNFTKeyVecDefault(), hold_values: HoldCotaNFTValueVecDefault(), claim_keys: ClaimCotaNFTKeyVecDefault(), claim_infos: ClaimCotaNFTInfoVecDefault(), proof: BytesDefault(), action: BytesDefault(), leaf_keys: Byte32VecDefault(), leaf_values: Byte32VecDefault(), withdrawal_proof: BytesDefault(), raw_tx: BytesDefault(), tx_proof: TransactionProofDefault()}
+	return &ClaimUpdateCotaNFTV2EntriesBuilder{hold_keys: HoldCotaNFTKeyVecDefault(), hold_values: HoldCotaNFTValueVecDefault(), claim_keys: ClaimCotaNFTKeyVecDefault(), claim_infos: ClaimCotaNFTInfoVecDefault(), proof: BytesDefault(), action: BytesDefault(), withdrawal_proof: BytesDefault(), leaf_keys: Byte32VecDefault(), leaf_values: Byte32VecDefault(), raw_tx: BytesDefault(), tx_proof: TransactionProofDefault()}
 }
 
 type ClaimUpdateCotaNFTV2Entries struct {
@@ -8908,7 +8908,7 @@ func ClaimUpdateCotaNFTV2EntriesFromSlice(slice []byte, compatible bool) (*Claim
 		return nil, err
 	}
 
-	_, err = Byte32VecFromSlice(slice[offsets[6]:offsets[7]], compatible)
+	_, err = BytesFromSlice(slice[offsets[6]:offsets[7]], compatible)
 	if err != nil {
 		return nil, err
 	}
@@ -8918,7 +8918,7 @@ func ClaimUpdateCotaNFTV2EntriesFromSlice(slice []byte, compatible bool) (*Claim
 		return nil, err
 	}
 
-	_, err = BytesFromSlice(slice[offsets[8]:offsets[9]], compatible)
+	_, err = Byte32VecFromSlice(slice[offsets[8]:offsets[9]], compatible)
 	if err != nil {
 		return nil, err
 	}
@@ -8997,22 +8997,22 @@ func (s *ClaimUpdateCotaNFTV2Entries) Action() *Bytes {
 	return BytesFromSliceUnchecked(s.inner[start:end])
 }
 
-func (s *ClaimUpdateCotaNFTV2Entries) LeafKeys() *Byte32Vec {
+func (s *ClaimUpdateCotaNFTV2Entries) WithdrawalProof() *Bytes {
 	start := unpackNumber(s.inner[28:])
 	end := unpackNumber(s.inner[32:])
-	return Byte32VecFromSliceUnchecked(s.inner[start:end])
+	return BytesFromSliceUnchecked(s.inner[start:end])
 }
 
-func (s *ClaimUpdateCotaNFTV2Entries) LeafValues() *Byte32Vec {
+func (s *ClaimUpdateCotaNFTV2Entries) LeafKeys() *Byte32Vec {
 	start := unpackNumber(s.inner[32:])
 	end := unpackNumber(s.inner[36:])
 	return Byte32VecFromSliceUnchecked(s.inner[start:end])
 }
 
-func (s *ClaimUpdateCotaNFTV2Entries) WithdrawalProof() *Bytes {
+func (s *ClaimUpdateCotaNFTV2Entries) LeafValues() *Byte32Vec {
 	start := unpackNumber(s.inner[36:])
 	end := unpackNumber(s.inner[40:])
-	return BytesFromSliceUnchecked(s.inner[start:end])
+	return Byte32VecFromSliceUnchecked(s.inner[start:end])
 }
 
 func (s *ClaimUpdateCotaNFTV2Entries) RawTx() *Bytes {
@@ -9034,7 +9034,7 @@ func (s *ClaimUpdateCotaNFTV2Entries) TxProof() *TransactionProof {
 }
 
 func (s *ClaimUpdateCotaNFTV2Entries) AsBuilder() ClaimUpdateCotaNFTV2EntriesBuilder {
-	ret := NewClaimUpdateCotaNFTV2EntriesBuilder().HoldKeys(*s.HoldKeys()).HoldValues(*s.HoldValues()).ClaimKeys(*s.ClaimKeys()).ClaimInfos(*s.ClaimInfos()).Proof(*s.Proof()).Action(*s.Action()).LeafKeys(*s.LeafKeys()).LeafValues(*s.LeafValues()).WithdrawalProof(*s.WithdrawalProof()).RawTx(*s.RawTx()).TxProof(*s.TxProof())
+	ret := NewClaimUpdateCotaNFTV2EntriesBuilder().HoldKeys(*s.HoldKeys()).HoldValues(*s.HoldValues()).ClaimKeys(*s.ClaimKeys()).ClaimInfos(*s.ClaimInfos()).Proof(*s.Proof()).Action(*s.Action()).WithdrawalProof(*s.WithdrawalProof()).LeafKeys(*s.LeafKeys()).LeafValues(*s.LeafValues()).RawTx(*s.RawTx()).TxProof(*s.TxProof())
 	return *ret
 }
 
@@ -9045,9 +9045,9 @@ type TransferUpdateCotaNFTV2EntriesBuilder struct {
 	withdrawal_values WithdrawalCotaNFTValueV1Vec
 	proof             Bytes
 	action            Bytes
+	withdrawal_proof  Bytes
 	leaf_keys         Byte32Vec
 	leaf_values       Byte32Vec
-	withdrawal_proof  Bytes
 	raw_tx            Bytes
 	tx_proof          TransactionProof
 }
@@ -9071,11 +9071,11 @@ func (s *TransferUpdateCotaNFTV2EntriesBuilder) Build() TransferUpdateCotaNFTV2E
 	offsets = append(offsets, totalSize)
 	totalSize += uint32(len(s.action.AsSlice()))
 	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.withdrawal_proof.AsSlice()))
+	offsets = append(offsets, totalSize)
 	totalSize += uint32(len(s.leaf_keys.AsSlice()))
 	offsets = append(offsets, totalSize)
 	totalSize += uint32(len(s.leaf_values.AsSlice()))
-	offsets = append(offsets, totalSize)
-	totalSize += uint32(len(s.withdrawal_proof.AsSlice()))
 	offsets = append(offsets, totalSize)
 	totalSize += uint32(len(s.raw_tx.AsSlice()))
 	offsets = append(offsets, totalSize)
@@ -9093,9 +9093,9 @@ func (s *TransferUpdateCotaNFTV2EntriesBuilder) Build() TransferUpdateCotaNFTV2E
 	b.Write(s.withdrawal_values.AsSlice())
 	b.Write(s.proof.AsSlice())
 	b.Write(s.action.AsSlice())
+	b.Write(s.withdrawal_proof.AsSlice())
 	b.Write(s.leaf_keys.AsSlice())
 	b.Write(s.leaf_values.AsSlice())
-	b.Write(s.withdrawal_proof.AsSlice())
 	b.Write(s.raw_tx.AsSlice())
 	b.Write(s.tx_proof.AsSlice())
 	return TransferUpdateCotaNFTV2Entries{inner: b.Bytes()}
@@ -9131,6 +9131,11 @@ func (s *TransferUpdateCotaNFTV2EntriesBuilder) Action(v Bytes) *TransferUpdateC
 	return s
 }
 
+func (s *TransferUpdateCotaNFTV2EntriesBuilder) WithdrawalProof(v Bytes) *TransferUpdateCotaNFTV2EntriesBuilder {
+	s.withdrawal_proof = v
+	return s
+}
+
 func (s *TransferUpdateCotaNFTV2EntriesBuilder) LeafKeys(v Byte32Vec) *TransferUpdateCotaNFTV2EntriesBuilder {
 	s.leaf_keys = v
 	return s
@@ -9138,11 +9143,6 @@ func (s *TransferUpdateCotaNFTV2EntriesBuilder) LeafKeys(v Byte32Vec) *TransferU
 
 func (s *TransferUpdateCotaNFTV2EntriesBuilder) LeafValues(v Byte32Vec) *TransferUpdateCotaNFTV2EntriesBuilder {
 	s.leaf_values = v
-	return s
-}
-
-func (s *TransferUpdateCotaNFTV2EntriesBuilder) WithdrawalProof(v Bytes) *TransferUpdateCotaNFTV2EntriesBuilder {
-	s.withdrawal_proof = v
 	return s
 }
 
@@ -9157,7 +9157,7 @@ func (s *TransferUpdateCotaNFTV2EntriesBuilder) TxProof(v TransactionProof) *Tra
 }
 
 func NewTransferUpdateCotaNFTV2EntriesBuilder() *TransferUpdateCotaNFTV2EntriesBuilder {
-	return &TransferUpdateCotaNFTV2EntriesBuilder{claim_keys: ClaimCotaNFTKeyVecDefault(), claim_infos: ClaimCotaNFTInfoVecDefault(), withdrawal_keys: WithdrawalCotaNFTKeyV1VecDefault(), withdrawal_values: WithdrawalCotaNFTValueV1VecDefault(), proof: BytesDefault(), action: BytesDefault(), leaf_keys: Byte32VecDefault(), leaf_values: Byte32VecDefault(), withdrawal_proof: BytesDefault(), raw_tx: BytesDefault(), tx_proof: TransactionProofDefault()}
+	return &TransferUpdateCotaNFTV2EntriesBuilder{claim_keys: ClaimCotaNFTKeyVecDefault(), claim_infos: ClaimCotaNFTInfoVecDefault(), withdrawal_keys: WithdrawalCotaNFTKeyV1VecDefault(), withdrawal_values: WithdrawalCotaNFTValueV1VecDefault(), proof: BytesDefault(), action: BytesDefault(), withdrawal_proof: BytesDefault(), leaf_keys: Byte32VecDefault(), leaf_values: Byte32VecDefault(), raw_tx: BytesDefault(), tx_proof: TransactionProofDefault()}
 }
 
 type TransferUpdateCotaNFTV2Entries struct {
@@ -9260,7 +9260,7 @@ func TransferUpdateCotaNFTV2EntriesFromSlice(slice []byte, compatible bool) (*Tr
 		return nil, err
 	}
 
-	_, err = Byte32VecFromSlice(slice[offsets[6]:offsets[7]], compatible)
+	_, err = BytesFromSlice(slice[offsets[6]:offsets[7]], compatible)
 	if err != nil {
 		return nil, err
 	}
@@ -9270,7 +9270,7 @@ func TransferUpdateCotaNFTV2EntriesFromSlice(slice []byte, compatible bool) (*Tr
 		return nil, err
 	}
 
-	_, err = BytesFromSlice(slice[offsets[8]:offsets[9]], compatible)
+	_, err = Byte32VecFromSlice(slice[offsets[8]:offsets[9]], compatible)
 	if err != nil {
 		return nil, err
 	}
@@ -9349,22 +9349,22 @@ func (s *TransferUpdateCotaNFTV2Entries) Action() *Bytes {
 	return BytesFromSliceUnchecked(s.inner[start:end])
 }
 
-func (s *TransferUpdateCotaNFTV2Entries) LeafKeys() *Byte32Vec {
+func (s *TransferUpdateCotaNFTV2Entries) WithdrawalProof() *Bytes {
 	start := unpackNumber(s.inner[28:])
 	end := unpackNumber(s.inner[32:])
-	return Byte32VecFromSliceUnchecked(s.inner[start:end])
+	return BytesFromSliceUnchecked(s.inner[start:end])
 }
 
-func (s *TransferUpdateCotaNFTV2Entries) LeafValues() *Byte32Vec {
+func (s *TransferUpdateCotaNFTV2Entries) LeafKeys() *Byte32Vec {
 	start := unpackNumber(s.inner[32:])
 	end := unpackNumber(s.inner[36:])
 	return Byte32VecFromSliceUnchecked(s.inner[start:end])
 }
 
-func (s *TransferUpdateCotaNFTV2Entries) WithdrawalProof() *Bytes {
+func (s *TransferUpdateCotaNFTV2Entries) LeafValues() *Byte32Vec {
 	start := unpackNumber(s.inner[36:])
 	end := unpackNumber(s.inner[40:])
-	return BytesFromSliceUnchecked(s.inner[start:end])
+	return Byte32VecFromSliceUnchecked(s.inner[start:end])
 }
 
 func (s *TransferUpdateCotaNFTV2Entries) RawTx() *Bytes {
@@ -9386,6 +9386,6 @@ func (s *TransferUpdateCotaNFTV2Entries) TxProof() *TransactionProof {
 }
 
 func (s *TransferUpdateCotaNFTV2Entries) AsBuilder() TransferUpdateCotaNFTV2EntriesBuilder {
-	ret := NewTransferUpdateCotaNFTV2EntriesBuilder().ClaimKeys(*s.ClaimKeys()).ClaimInfos(*s.ClaimInfos()).WithdrawalKeys(*s.WithdrawalKeys()).WithdrawalValues(*s.WithdrawalValues()).Proof(*s.Proof()).Action(*s.Action()).LeafKeys(*s.LeafKeys()).LeafValues(*s.LeafValues()).WithdrawalProof(*s.WithdrawalProof()).RawTx(*s.RawTx()).TxProof(*s.TxProof())
+	ret := NewTransferUpdateCotaNFTV2EntriesBuilder().ClaimKeys(*s.ClaimKeys()).ClaimInfos(*s.ClaimInfos()).WithdrawalKeys(*s.WithdrawalKeys()).WithdrawalValues(*s.WithdrawalValues()).Proof(*s.Proof()).Action(*s.Action()).WithdrawalProof(*s.WithdrawalProof()).LeafKeys(*s.LeafKeys()).LeafValues(*s.LeafValues()).RawTx(*s.RawTx()).TxProof(*s.TxProof())
 	return *ret
 }

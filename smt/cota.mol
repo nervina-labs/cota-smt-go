@@ -222,6 +222,7 @@ table TransferUpdateCotaNFTV1Entries {
 
 
 // V2
+// The leaf_keys/leaf_values/raw_tx/tx_proof are used to verify withdraw smt proof
 table ClaimCotaNFTV2Entries {
   hold_keys: HoldCotaNFTKeyVec,
   hold_values: HoldCotaNFTValueVec,
@@ -230,11 +231,9 @@ table ClaimCotaNFTV2Entries {
   proof: Bytes,
   action: Bytes,
 
-  // The leaf_keys and leaf_values are used to verify withdraw smt proof
+  withdrawal_proof: Bytes,
   leaf_keys: Byte32Vec,
   leaf_values: Byte32Vec,
-  withdrawal_proof: Bytes,
-
   raw_tx: Bytes,
   tx_proof: TransactionProof,
 }
@@ -247,11 +246,9 @@ table TransferCotaNFTV2Entries {
   proof: Bytes,
   action: Bytes,
 
-  // The leaf_keys and leaf_values are used to verify withdraw smt proof
+  withdrawal_proof: Bytes,
   leaf_keys: Byte32Vec,
   leaf_values: Byte32Vec,
-  withdrawal_proof: Bytes,
-
   raw_tx: Bytes,
   tx_proof: TransactionProof,
 }
@@ -264,11 +261,9 @@ table ClaimUpdateCotaNFTV2Entries {
   proof: Bytes,
   action: Bytes,
 
-  // The leaf_keys and leaf_values are used to verify withdraw smt proof
+  withdrawal_proof: Bytes,
   leaf_keys: Byte32Vec,
   leaf_values: Byte32Vec,
-  withdrawal_proof: Bytes,
-
   raw_tx: Bytes,
   tx_proof: TransactionProof,
 }
@@ -281,11 +276,9 @@ table TransferUpdateCotaNFTV2Entries {
   proof: Bytes,
   action: Bytes,
 
-  // The leaf_keys and leaf_values are used to verify withdraw smt proof
+  withdrawal_proof: Bytes,
   leaf_keys: Byte32Vec,
   leaf_values: Byte32Vec,
-  withdrawal_proof: Bytes,
-
   raw_tx: Bytes,
   tx_proof: TransactionProof,
 }
