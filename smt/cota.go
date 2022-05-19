@@ -1626,6 +1626,242 @@ func (s *OutPointSlice) AsBuilder() OutPointSliceBuilder {
 	return *t
 }
 
+type Uint32VecBuilder struct {
+	inner []Uint32
+}
+
+func (s *Uint32VecBuilder) Build() Uint32Vec {
+	size := packNumber(Number(len(s.inner)))
+
+	b := new(bytes.Buffer)
+
+	b.Write(size)
+	len := len(s.inner)
+	for i := 0; i < len; i++ {
+		b.Write(s.inner[i].AsSlice())
+	}
+
+	sb := Uint32Vec{inner: b.Bytes()}
+
+	return sb
+}
+
+func (s *Uint32VecBuilder) Set(v []Uint32) *Uint32VecBuilder {
+	s.inner = v
+	return s
+}
+func (s *Uint32VecBuilder) Push(v Uint32) *Uint32VecBuilder {
+	s.inner = append(s.inner, v)
+	return s
+}
+func (s *Uint32VecBuilder) Extend(iter []Uint32) *Uint32VecBuilder {
+	for i := 0; i < len(iter); i++ {
+		s.inner = append(s.inner, iter[i])
+	}
+	return s
+}
+func (s *Uint32VecBuilder) Replace(index uint, v Uint32) *Uint32 {
+	if uint(len(s.inner)) > index {
+		a := s.inner[index]
+		s.inner[index] = v
+		return &a
+	}
+	return nil
+}
+
+func NewUint32VecBuilder() *Uint32VecBuilder {
+	return &Uint32VecBuilder{[]Uint32{}}
+}
+
+type Uint32Vec struct {
+	inner []byte
+}
+
+func Uint32VecFromSliceUnchecked(slice []byte) *Uint32Vec {
+	return &Uint32Vec{inner: slice}
+}
+func (s *Uint32Vec) AsSlice() []byte {
+	return s.inner
+}
+
+func Uint32VecDefault() Uint32Vec {
+	return *Uint32VecFromSliceUnchecked([]byte{0, 0, 0, 0})
+}
+
+func Uint32VecFromSlice(slice []byte, _compatible bool) (*Uint32Vec, error) {
+	sliceLen := len(slice)
+	if sliceLen < int(HeaderSizeUint) {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "Uint32Vec", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint))}, " ")
+		return nil, errors.New(errMsg)
+	}
+	itemCount := unpackNumber(slice)
+	if itemCount == 0 {
+		if sliceLen != int(HeaderSizeUint) {
+			errMsg := strings.Join([]string{"TotalSizeNotMatch", "Uint32Vec", strconv.Itoa(int(sliceLen)), "!=", strconv.Itoa(int(HeaderSizeUint))}, " ")
+			return nil, errors.New(errMsg)
+		}
+		return &Uint32Vec{inner: slice}, nil
+	}
+	totalSize := int(HeaderSizeUint) + int(4*itemCount)
+	if sliceLen != totalSize {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "Uint32Vec", strconv.Itoa(int(sliceLen)), "!=", strconv.Itoa(int(totalSize))}, " ")
+		return nil, errors.New(errMsg)
+	}
+	return &Uint32Vec{inner: slice}, nil
+}
+
+func (s *Uint32Vec) TotalSize() uint {
+	return uint(HeaderSizeUint) + 4*s.ItemCount()
+}
+func (s *Uint32Vec) ItemCount() uint {
+	number := uint(unpackNumber(s.inner))
+	return number
+}
+func (s *Uint32Vec) Len() uint {
+	return s.ItemCount()
+}
+func (s *Uint32Vec) IsEmpty() bool {
+	return s.Len() == 0
+}
+
+// if *Uint32 is nil, index is out of bounds
+func (s *Uint32Vec) Get(index uint) *Uint32 {
+	var re *Uint32
+	if index < s.Len() {
+		start := uint(HeaderSizeUint) + 4*index
+		end := start + 4
+		re = Uint32FromSliceUnchecked(s.inner[start:end])
+	}
+	return re
+}
+
+func (s *Uint32Vec) AsBuilder() Uint32VecBuilder {
+	size := s.ItemCount()
+	t := NewUint32VecBuilder()
+	for i := uint(0); i < size; i++ {
+		t.Push(*s.Get(i))
+	}
+	return *t
+}
+
+type Byte32VecBuilder struct {
+	inner []Byte32
+}
+
+func (s *Byte32VecBuilder) Build() Byte32Vec {
+	size := packNumber(Number(len(s.inner)))
+
+	b := new(bytes.Buffer)
+
+	b.Write(size)
+	len := len(s.inner)
+	for i := 0; i < len; i++ {
+		b.Write(s.inner[i].AsSlice())
+	}
+
+	sb := Byte32Vec{inner: b.Bytes()}
+
+	return sb
+}
+
+func (s *Byte32VecBuilder) Set(v []Byte32) *Byte32VecBuilder {
+	s.inner = v
+	return s
+}
+func (s *Byte32VecBuilder) Push(v Byte32) *Byte32VecBuilder {
+	s.inner = append(s.inner, v)
+	return s
+}
+func (s *Byte32VecBuilder) Extend(iter []Byte32) *Byte32VecBuilder {
+	for i := 0; i < len(iter); i++ {
+		s.inner = append(s.inner, iter[i])
+	}
+	return s
+}
+func (s *Byte32VecBuilder) Replace(index uint, v Byte32) *Byte32 {
+	if uint(len(s.inner)) > index {
+		a := s.inner[index]
+		s.inner[index] = v
+		return &a
+	}
+	return nil
+}
+
+func NewByte32VecBuilder() *Byte32VecBuilder {
+	return &Byte32VecBuilder{[]Byte32{}}
+}
+
+type Byte32Vec struct {
+	inner []byte
+}
+
+func Byte32VecFromSliceUnchecked(slice []byte) *Byte32Vec {
+	return &Byte32Vec{inner: slice}
+}
+func (s *Byte32Vec) AsSlice() []byte {
+	return s.inner
+}
+
+func Byte32VecDefault() Byte32Vec {
+	return *Byte32VecFromSliceUnchecked([]byte{0, 0, 0, 0})
+}
+
+func Byte32VecFromSlice(slice []byte, _compatible bool) (*Byte32Vec, error) {
+	sliceLen := len(slice)
+	if sliceLen < int(HeaderSizeUint) {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "Byte32Vec", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint))}, " ")
+		return nil, errors.New(errMsg)
+	}
+	itemCount := unpackNumber(slice)
+	if itemCount == 0 {
+		if sliceLen != int(HeaderSizeUint) {
+			errMsg := strings.Join([]string{"TotalSizeNotMatch", "Byte32Vec", strconv.Itoa(int(sliceLen)), "!=", strconv.Itoa(int(HeaderSizeUint))}, " ")
+			return nil, errors.New(errMsg)
+		}
+		return &Byte32Vec{inner: slice}, nil
+	}
+	totalSize := int(HeaderSizeUint) + int(32*itemCount)
+	if sliceLen != totalSize {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "Byte32Vec", strconv.Itoa(int(sliceLen)), "!=", strconv.Itoa(int(totalSize))}, " ")
+		return nil, errors.New(errMsg)
+	}
+	return &Byte32Vec{inner: slice}, nil
+}
+
+func (s *Byte32Vec) TotalSize() uint {
+	return uint(HeaderSizeUint) + 32*s.ItemCount()
+}
+func (s *Byte32Vec) ItemCount() uint {
+	number := uint(unpackNumber(s.inner))
+	return number
+}
+func (s *Byte32Vec) Len() uint {
+	return s.ItemCount()
+}
+func (s *Byte32Vec) IsEmpty() bool {
+	return s.Len() == 0
+}
+
+// if *Byte32 is nil, index is out of bounds
+func (s *Byte32Vec) Get(index uint) *Byte32 {
+	var re *Byte32
+	if index < s.Len() {
+		start := uint(HeaderSizeUint) + 32*index
+		end := start + 32
+		re = Byte32FromSliceUnchecked(s.inner[start:end])
+	}
+	return re
+}
+
+func (s *Byte32Vec) AsBuilder() Byte32VecBuilder {
+	size := s.ItemCount()
+	t := NewByte32VecBuilder()
+	for i := uint(0); i < size; i++ {
+		t.Push(*s.Get(i))
+	}
+	return *t
+}
+
 type CotaNFTIdBuilder struct {
 	smtType Uint16
 	cotaId  CotaId
@@ -1777,6 +2013,350 @@ func (s *CotaNFTInfo) Characteristic() *Characteristic {
 
 func (s *CotaNFTInfo) AsBuilder() CotaNFTInfoBuilder {
 	ret := NewCotaNFTInfoBuilder().Configure(*s.Configure()).State(*s.State()).Characteristic(*s.Characteristic())
+	return *ret
+}
+
+type MerkleProofBuilder struct {
+	indices Uint32Vec
+	lemmas  Byte32Vec
+}
+
+func (s *MerkleProofBuilder) Build() MerkleProof {
+	b := new(bytes.Buffer)
+
+	totalSize := HeaderSizeUint * (2 + 1)
+	offsets := make([]uint32, 0, 2)
+
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.indices.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.lemmas.AsSlice()))
+
+	b.Write(packNumber(Number(totalSize)))
+
+	for i := 0; i < len(offsets); i++ {
+		b.Write(packNumber(Number(offsets[i])))
+	}
+
+	b.Write(s.indices.AsSlice())
+	b.Write(s.lemmas.AsSlice())
+	return MerkleProof{inner: b.Bytes()}
+}
+
+func (s *MerkleProofBuilder) Indices(v Uint32Vec) *MerkleProofBuilder {
+	s.indices = v
+	return s
+}
+
+func (s *MerkleProofBuilder) Lemmas(v Byte32Vec) *MerkleProofBuilder {
+	s.lemmas = v
+	return s
+}
+
+func NewMerkleProofBuilder() *MerkleProofBuilder {
+	return &MerkleProofBuilder{indices: Uint32VecDefault(), lemmas: Byte32VecDefault()}
+}
+
+type MerkleProof struct {
+	inner []byte
+}
+
+func MerkleProofFromSliceUnchecked(slice []byte) *MerkleProof {
+	return &MerkleProof{inner: slice}
+}
+func (s *MerkleProof) AsSlice() []byte {
+	return s.inner
+}
+
+func MerkleProofDefault() MerkleProof {
+	return *MerkleProofFromSliceUnchecked([]byte{20, 0, 0, 0, 12, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
+}
+
+func MerkleProofFromSlice(slice []byte, compatible bool) (*MerkleProof, error) {
+	sliceLen := len(slice)
+	if uint32(sliceLen) < HeaderSizeUint {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "MerkleProof", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	totalSize := unpackNumber(slice)
+	if Number(sliceLen) != totalSize {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "MerkleProof", strconv.Itoa(int(sliceLen)), "!=", strconv.Itoa(int(totalSize))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if uint32(sliceLen) == HeaderSizeUint && 2 == 0 {
+		return &MerkleProof{inner: slice}, nil
+	}
+
+	if uint32(sliceLen) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "MerkleProof", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	offsetFirst := unpackNumber(slice[HeaderSizeUint:])
+	if uint32(offsetFirst)%HeaderSizeUint != 0 || uint32(offsetFirst) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"OffsetsNotMatch", "MerkleProof", strconv.Itoa(int(offsetFirst % 4)), "!= 0", strconv.Itoa(int(offsetFirst)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if sliceLen < int(offsetFirst) {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "MerkleProof", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(offsetFirst))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	fieldCount := uint32(offsetFirst)/HeaderSizeUint - 1
+	if fieldCount < 2 {
+		return nil, errors.New("FieldCountNotMatch")
+	} else if !compatible && fieldCount > 2 {
+		return nil, errors.New("FieldCountNotMatch")
+	}
+
+	offsets := make([]uint32, fieldCount)
+
+	for i := 0; i < int(fieldCount); i++ {
+		offsets[i] = uint32(unpackNumber(slice[HeaderSizeUint:][int(HeaderSizeUint)*i:]))
+	}
+	offsets = append(offsets, uint32(totalSize))
+
+	for i := 0; i < len(offsets); i++ {
+		if i&1 != 0 && offsets[i-1] > offsets[i] {
+			return nil, errors.New("OffsetsNotMatch")
+		}
+	}
+
+	var err error
+
+	_, err = Uint32VecFromSlice(slice[offsets[0]:offsets[1]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = Byte32VecFromSlice(slice[offsets[1]:offsets[2]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	return &MerkleProof{inner: slice}, nil
+}
+
+func (s *MerkleProof) TotalSize() uint {
+	return uint(unpackNumber(s.inner))
+}
+func (s *MerkleProof) FieldCount() uint {
+	var number uint = 0
+	if uint32(s.TotalSize()) == HeaderSizeUint {
+		return number
+	}
+	number = uint(unpackNumber(s.inner[HeaderSizeUint:]))/4 - 1
+	return number
+}
+func (s *MerkleProof) Len() uint {
+	return s.FieldCount()
+}
+func (s *MerkleProof) IsEmpty() bool {
+	return s.Len() == 0
+}
+func (s *MerkleProof) CountExtraFields() uint {
+	return s.FieldCount() - 2
+}
+
+func (s *MerkleProof) HasExtraFields() bool {
+	return 2 != s.FieldCount()
+}
+
+func (s *MerkleProof) Indices() *Uint32Vec {
+	start := unpackNumber(s.inner[4:])
+	end := unpackNumber(s.inner[8:])
+	return Uint32VecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *MerkleProof) Lemmas() *Byte32Vec {
+	var ret *Byte32Vec
+	start := unpackNumber(s.inner[8:])
+	if s.HasExtraFields() {
+		end := unpackNumber(s.inner[12:])
+		ret = Byte32VecFromSliceUnchecked(s.inner[start:end])
+	} else {
+		ret = Byte32VecFromSliceUnchecked(s.inner[start:])
+	}
+	return ret
+}
+
+func (s *MerkleProof) AsBuilder() MerkleProofBuilder {
+	ret := NewMerkleProofBuilder().Indices(*s.Indices()).Lemmas(*s.Lemmas())
+	return *ret
+}
+
+type TransactionProofBuilder struct {
+	witnesses_root Byte32
+	proof          MerkleProof
+}
+
+func (s *TransactionProofBuilder) Build() TransactionProof {
+	b := new(bytes.Buffer)
+
+	totalSize := HeaderSizeUint * (2 + 1)
+	offsets := make([]uint32, 0, 2)
+
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.witnesses_root.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.proof.AsSlice()))
+
+	b.Write(packNumber(Number(totalSize)))
+
+	for i := 0; i < len(offsets); i++ {
+		b.Write(packNumber(Number(offsets[i])))
+	}
+
+	b.Write(s.witnesses_root.AsSlice())
+	b.Write(s.proof.AsSlice())
+	return TransactionProof{inner: b.Bytes()}
+}
+
+func (s *TransactionProofBuilder) WitnessesRoot(v Byte32) *TransactionProofBuilder {
+	s.witnesses_root = v
+	return s
+}
+
+func (s *TransactionProofBuilder) Proof(v MerkleProof) *TransactionProofBuilder {
+	s.proof = v
+	return s
+}
+
+func NewTransactionProofBuilder() *TransactionProofBuilder {
+	return &TransactionProofBuilder{witnesses_root: Byte32Default(), proof: MerkleProofDefault()}
+}
+
+type TransactionProof struct {
+	inner []byte
+}
+
+func TransactionProofFromSliceUnchecked(slice []byte) *TransactionProof {
+	return &TransactionProof{inner: slice}
+}
+func (s *TransactionProof) AsSlice() []byte {
+	return s.inner
+}
+
+func TransactionProofDefault() TransactionProof {
+	return *TransactionProofFromSliceUnchecked([]byte{64, 0, 0, 0, 12, 0, 0, 0, 44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 12, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
+}
+
+func TransactionProofFromSlice(slice []byte, compatible bool) (*TransactionProof, error) {
+	sliceLen := len(slice)
+	if uint32(sliceLen) < HeaderSizeUint {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "TransactionProof", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	totalSize := unpackNumber(slice)
+	if Number(sliceLen) != totalSize {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "TransactionProof", strconv.Itoa(int(sliceLen)), "!=", strconv.Itoa(int(totalSize))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if uint32(sliceLen) == HeaderSizeUint && 2 == 0 {
+		return &TransactionProof{inner: slice}, nil
+	}
+
+	if uint32(sliceLen) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "TransactionProof", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	offsetFirst := unpackNumber(slice[HeaderSizeUint:])
+	if uint32(offsetFirst)%HeaderSizeUint != 0 || uint32(offsetFirst) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"OffsetsNotMatch", "TransactionProof", strconv.Itoa(int(offsetFirst % 4)), "!= 0", strconv.Itoa(int(offsetFirst)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if sliceLen < int(offsetFirst) {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "TransactionProof", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(offsetFirst))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	fieldCount := uint32(offsetFirst)/HeaderSizeUint - 1
+	if fieldCount < 2 {
+		return nil, errors.New("FieldCountNotMatch")
+	} else if !compatible && fieldCount > 2 {
+		return nil, errors.New("FieldCountNotMatch")
+	}
+
+	offsets := make([]uint32, fieldCount)
+
+	for i := 0; i < int(fieldCount); i++ {
+		offsets[i] = uint32(unpackNumber(slice[HeaderSizeUint:][int(HeaderSizeUint)*i:]))
+	}
+	offsets = append(offsets, uint32(totalSize))
+
+	for i := 0; i < len(offsets); i++ {
+		if i&1 != 0 && offsets[i-1] > offsets[i] {
+			return nil, errors.New("OffsetsNotMatch")
+		}
+	}
+
+	var err error
+
+	_, err = Byte32FromSlice(slice[offsets[0]:offsets[1]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = MerkleProofFromSlice(slice[offsets[1]:offsets[2]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	return &TransactionProof{inner: slice}, nil
+}
+
+func (s *TransactionProof) TotalSize() uint {
+	return uint(unpackNumber(s.inner))
+}
+func (s *TransactionProof) FieldCount() uint {
+	var number uint = 0
+	if uint32(s.TotalSize()) == HeaderSizeUint {
+		return number
+	}
+	number = uint(unpackNumber(s.inner[HeaderSizeUint:]))/4 - 1
+	return number
+}
+func (s *TransactionProof) Len() uint {
+	return s.FieldCount()
+}
+func (s *TransactionProof) IsEmpty() bool {
+	return s.Len() == 0
+}
+func (s *TransactionProof) CountExtraFields() uint {
+	return s.FieldCount() - 2
+}
+
+func (s *TransactionProof) HasExtraFields() bool {
+	return 2 != s.FieldCount()
+}
+
+func (s *TransactionProof) WitnessesRoot() *Byte32 {
+	start := unpackNumber(s.inner[4:])
+	end := unpackNumber(s.inner[8:])
+	return Byte32FromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransactionProof) Proof() *MerkleProof {
+	var ret *MerkleProof
+	start := unpackNumber(s.inner[8:])
+	if s.HasExtraFields() {
+		end := unpackNumber(s.inner[12:])
+		ret = MerkleProofFromSliceUnchecked(s.inner[start:end])
+	} else {
+		ret = MerkleProofFromSliceUnchecked(s.inner[start:])
+	}
+	return ret
+}
+
+func (s *TransactionProof) AsBuilder() TransactionProofBuilder {
+	ret := NewTransactionProofBuilder().WitnessesRoot(*s.WitnessesRoot()).Proof(*s.Proof())
 	return *ret
 }
 
@@ -7399,5 +7979,1413 @@ func (s *TransferUpdateCotaNFTV1Entries) Action() *Bytes {
 
 func (s *TransferUpdateCotaNFTV1Entries) AsBuilder() TransferUpdateCotaNFTV1EntriesBuilder {
 	ret := NewTransferUpdateCotaNFTV1EntriesBuilder().ClaimKeys(*s.ClaimKeys()).ClaimInfos(*s.ClaimInfos()).WithdrawalKeys(*s.WithdrawalKeys()).WithdrawalValues(*s.WithdrawalValues()).Proof(*s.Proof()).WithdrawalProof(*s.WithdrawalProof()).Action(*s.Action())
+	return *ret
+}
+
+type ClaimCotaNFTV2EntriesBuilder struct {
+	hold_keys        HoldCotaNFTKeyVec
+	hold_values      HoldCotaNFTValueVec
+	claim_keys       ClaimCotaNFTKeyVec
+	claim_values     ClaimCotaNFTValueVec
+	proof            Bytes
+	action           Bytes
+	withdrawal_proof Bytes
+	leaf_keys        Byte32Vec
+	leaf_values      Byte32Vec
+	raw_tx           Bytes
+	tx_proof         TransactionProof
+}
+
+func (s *ClaimCotaNFTV2EntriesBuilder) Build() ClaimCotaNFTV2Entries {
+	b := new(bytes.Buffer)
+
+	totalSize := HeaderSizeUint * (11 + 1)
+	offsets := make([]uint32, 0, 11)
+
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.hold_keys.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.hold_values.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.claim_keys.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.claim_values.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.proof.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.action.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.withdrawal_proof.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.leaf_keys.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.leaf_values.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.raw_tx.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.tx_proof.AsSlice()))
+
+	b.Write(packNumber(Number(totalSize)))
+
+	for i := 0; i < len(offsets); i++ {
+		b.Write(packNumber(Number(offsets[i])))
+	}
+
+	b.Write(s.hold_keys.AsSlice())
+	b.Write(s.hold_values.AsSlice())
+	b.Write(s.claim_keys.AsSlice())
+	b.Write(s.claim_values.AsSlice())
+	b.Write(s.proof.AsSlice())
+	b.Write(s.action.AsSlice())
+	b.Write(s.withdrawal_proof.AsSlice())
+	b.Write(s.leaf_keys.AsSlice())
+	b.Write(s.leaf_values.AsSlice())
+	b.Write(s.raw_tx.AsSlice())
+	b.Write(s.tx_proof.AsSlice())
+	return ClaimCotaNFTV2Entries{inner: b.Bytes()}
+}
+
+func (s *ClaimCotaNFTV2EntriesBuilder) HoldKeys(v HoldCotaNFTKeyVec) *ClaimCotaNFTV2EntriesBuilder {
+	s.hold_keys = v
+	return s
+}
+
+func (s *ClaimCotaNFTV2EntriesBuilder) HoldValues(v HoldCotaNFTValueVec) *ClaimCotaNFTV2EntriesBuilder {
+	s.hold_values = v
+	return s
+}
+
+func (s *ClaimCotaNFTV2EntriesBuilder) ClaimKeys(v ClaimCotaNFTKeyVec) *ClaimCotaNFTV2EntriesBuilder {
+	s.claim_keys = v
+	return s
+}
+
+func (s *ClaimCotaNFTV2EntriesBuilder) ClaimValues(v ClaimCotaNFTValueVec) *ClaimCotaNFTV2EntriesBuilder {
+	s.claim_values = v
+	return s
+}
+
+func (s *ClaimCotaNFTV2EntriesBuilder) Proof(v Bytes) *ClaimCotaNFTV2EntriesBuilder {
+	s.proof = v
+	return s
+}
+
+func (s *ClaimCotaNFTV2EntriesBuilder) Action(v Bytes) *ClaimCotaNFTV2EntriesBuilder {
+	s.action = v
+	return s
+}
+
+func (s *ClaimCotaNFTV2EntriesBuilder) WithdrawalProof(v Bytes) *ClaimCotaNFTV2EntriesBuilder {
+	s.withdrawal_proof = v
+	return s
+}
+
+func (s *ClaimCotaNFTV2EntriesBuilder) LeafKeys(v Byte32Vec) *ClaimCotaNFTV2EntriesBuilder {
+	s.leaf_keys = v
+	return s
+}
+
+func (s *ClaimCotaNFTV2EntriesBuilder) LeafValues(v Byte32Vec) *ClaimCotaNFTV2EntriesBuilder {
+	s.leaf_values = v
+	return s
+}
+
+func (s *ClaimCotaNFTV2EntriesBuilder) RawTx(v Bytes) *ClaimCotaNFTV2EntriesBuilder {
+	s.raw_tx = v
+	return s
+}
+
+func (s *ClaimCotaNFTV2EntriesBuilder) TxProof(v TransactionProof) *ClaimCotaNFTV2EntriesBuilder {
+	s.tx_proof = v
+	return s
+}
+
+func NewClaimCotaNFTV2EntriesBuilder() *ClaimCotaNFTV2EntriesBuilder {
+	return &ClaimCotaNFTV2EntriesBuilder{hold_keys: HoldCotaNFTKeyVecDefault(), hold_values: HoldCotaNFTValueVecDefault(), claim_keys: ClaimCotaNFTKeyVecDefault(), claim_values: ClaimCotaNFTValueVecDefault(), proof: BytesDefault(), action: BytesDefault(), withdrawal_proof: BytesDefault(), leaf_keys: Byte32VecDefault(), leaf_values: Byte32VecDefault(), raw_tx: BytesDefault(), tx_proof: TransactionProofDefault()}
+}
+
+type ClaimCotaNFTV2Entries struct {
+	inner []byte
+}
+
+func ClaimCotaNFTV2EntriesFromSliceUnchecked(slice []byte) *ClaimCotaNFTV2Entries {
+	return &ClaimCotaNFTV2Entries{inner: slice}
+}
+func (s *ClaimCotaNFTV2Entries) AsSlice() []byte {
+	return s.inner
+}
+
+func ClaimCotaNFTV2EntriesDefault() ClaimCotaNFTV2Entries {
+	return *ClaimCotaNFTV2EntriesFromSliceUnchecked([]byte{152, 0, 0, 0, 48, 0, 0, 0, 52, 0, 0, 0, 56, 0, 0, 0, 60, 0, 0, 0, 64, 0, 0, 0, 68, 0, 0, 0, 72, 0, 0, 0, 76, 0, 0, 0, 80, 0, 0, 0, 84, 0, 0, 0, 88, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 12, 0, 0, 0, 44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 12, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
+}
+
+func ClaimCotaNFTV2EntriesFromSlice(slice []byte, compatible bool) (*ClaimCotaNFTV2Entries, error) {
+	sliceLen := len(slice)
+	if uint32(sliceLen) < HeaderSizeUint {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "ClaimCotaNFTV2Entries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	totalSize := unpackNumber(slice)
+	if Number(sliceLen) != totalSize {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "ClaimCotaNFTV2Entries", strconv.Itoa(int(sliceLen)), "!=", strconv.Itoa(int(totalSize))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if uint32(sliceLen) == HeaderSizeUint && 11 == 0 {
+		return &ClaimCotaNFTV2Entries{inner: slice}, nil
+	}
+
+	if uint32(sliceLen) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "ClaimCotaNFTV2Entries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	offsetFirst := unpackNumber(slice[HeaderSizeUint:])
+	if uint32(offsetFirst)%HeaderSizeUint != 0 || uint32(offsetFirst) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"OffsetsNotMatch", "ClaimCotaNFTV2Entries", strconv.Itoa(int(offsetFirst % 4)), "!= 0", strconv.Itoa(int(offsetFirst)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if sliceLen < int(offsetFirst) {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "ClaimCotaNFTV2Entries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(offsetFirst))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	fieldCount := uint32(offsetFirst)/HeaderSizeUint - 1
+	if fieldCount < 11 {
+		return nil, errors.New("FieldCountNotMatch")
+	} else if !compatible && fieldCount > 11 {
+		return nil, errors.New("FieldCountNotMatch")
+	}
+
+	offsets := make([]uint32, fieldCount)
+
+	for i := 0; i < int(fieldCount); i++ {
+		offsets[i] = uint32(unpackNumber(slice[HeaderSizeUint:][int(HeaderSizeUint)*i:]))
+	}
+	offsets = append(offsets, uint32(totalSize))
+
+	for i := 0; i < len(offsets); i++ {
+		if i&1 != 0 && offsets[i-1] > offsets[i] {
+			return nil, errors.New("OffsetsNotMatch")
+		}
+	}
+
+	var err error
+
+	_, err = HoldCotaNFTKeyVecFromSlice(slice[offsets[0]:offsets[1]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = HoldCotaNFTValueVecFromSlice(slice[offsets[1]:offsets[2]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = ClaimCotaNFTKeyVecFromSlice(slice[offsets[2]:offsets[3]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = ClaimCotaNFTValueVecFromSlice(slice[offsets[3]:offsets[4]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[4]:offsets[5]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[5]:offsets[6]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[6]:offsets[7]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = Byte32VecFromSlice(slice[offsets[7]:offsets[8]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = Byte32VecFromSlice(slice[offsets[8]:offsets[9]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[9]:offsets[10]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = TransactionProofFromSlice(slice[offsets[10]:offsets[11]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ClaimCotaNFTV2Entries{inner: slice}, nil
+}
+
+func (s *ClaimCotaNFTV2Entries) TotalSize() uint {
+	return uint(unpackNumber(s.inner))
+}
+func (s *ClaimCotaNFTV2Entries) FieldCount() uint {
+	var number uint = 0
+	if uint32(s.TotalSize()) == HeaderSizeUint {
+		return number
+	}
+	number = uint(unpackNumber(s.inner[HeaderSizeUint:]))/4 - 1
+	return number
+}
+func (s *ClaimCotaNFTV2Entries) Len() uint {
+	return s.FieldCount()
+}
+func (s *ClaimCotaNFTV2Entries) IsEmpty() bool {
+	return s.Len() == 0
+}
+func (s *ClaimCotaNFTV2Entries) CountExtraFields() uint {
+	return s.FieldCount() - 11
+}
+
+func (s *ClaimCotaNFTV2Entries) HasExtraFields() bool {
+	return 11 != s.FieldCount()
+}
+
+func (s *ClaimCotaNFTV2Entries) HoldKeys() *HoldCotaNFTKeyVec {
+	start := unpackNumber(s.inner[4:])
+	end := unpackNumber(s.inner[8:])
+	return HoldCotaNFTKeyVecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *ClaimCotaNFTV2Entries) HoldValues() *HoldCotaNFTValueVec {
+	start := unpackNumber(s.inner[8:])
+	end := unpackNumber(s.inner[12:])
+	return HoldCotaNFTValueVecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *ClaimCotaNFTV2Entries) ClaimKeys() *ClaimCotaNFTKeyVec {
+	start := unpackNumber(s.inner[12:])
+	end := unpackNumber(s.inner[16:])
+	return ClaimCotaNFTKeyVecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *ClaimCotaNFTV2Entries) ClaimValues() *ClaimCotaNFTValueVec {
+	start := unpackNumber(s.inner[16:])
+	end := unpackNumber(s.inner[20:])
+	return ClaimCotaNFTValueVecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *ClaimCotaNFTV2Entries) Proof() *Bytes {
+	start := unpackNumber(s.inner[20:])
+	end := unpackNumber(s.inner[24:])
+	return BytesFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *ClaimCotaNFTV2Entries) Action() *Bytes {
+	start := unpackNumber(s.inner[24:])
+	end := unpackNumber(s.inner[28:])
+	return BytesFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *ClaimCotaNFTV2Entries) WithdrawalProof() *Bytes {
+	start := unpackNumber(s.inner[28:])
+	end := unpackNumber(s.inner[32:])
+	return BytesFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *ClaimCotaNFTV2Entries) LeafKeys() *Byte32Vec {
+	start := unpackNumber(s.inner[32:])
+	end := unpackNumber(s.inner[36:])
+	return Byte32VecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *ClaimCotaNFTV2Entries) LeafValues() *Byte32Vec {
+	start := unpackNumber(s.inner[36:])
+	end := unpackNumber(s.inner[40:])
+	return Byte32VecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *ClaimCotaNFTV2Entries) RawTx() *Bytes {
+	start := unpackNumber(s.inner[40:])
+	end := unpackNumber(s.inner[44:])
+	return BytesFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *ClaimCotaNFTV2Entries) TxProof() *TransactionProof {
+	var ret *TransactionProof
+	start := unpackNumber(s.inner[44:])
+	if s.HasExtraFields() {
+		end := unpackNumber(s.inner[48:])
+		ret = TransactionProofFromSliceUnchecked(s.inner[start:end])
+	} else {
+		ret = TransactionProofFromSliceUnchecked(s.inner[start:])
+	}
+	return ret
+}
+
+func (s *ClaimCotaNFTV2Entries) AsBuilder() ClaimCotaNFTV2EntriesBuilder {
+	ret := NewClaimCotaNFTV2EntriesBuilder().HoldKeys(*s.HoldKeys()).HoldValues(*s.HoldValues()).ClaimKeys(*s.ClaimKeys()).ClaimValues(*s.ClaimValues()).Proof(*s.Proof()).Action(*s.Action()).WithdrawalProof(*s.WithdrawalProof()).LeafKeys(*s.LeafKeys()).LeafValues(*s.LeafValues()).RawTx(*s.RawTx()).TxProof(*s.TxProof())
+	return *ret
+}
+
+type TransferCotaNFTV2EntriesBuilder struct {
+	claim_keys        ClaimCotaNFTKeyVec
+	claim_values      ClaimCotaNFTValueVec
+	withdrawal_keys   WithdrawalCotaNFTKeyV1Vec
+	withdrawal_values WithdrawalCotaNFTValueV1Vec
+	proof             Bytes
+	action            Bytes
+	withdrawal_proof  Bytes
+	leaf_keys         Byte32Vec
+	leaf_values       Byte32Vec
+	raw_tx            Bytes
+	tx_proof          TransactionProof
+}
+
+func (s *TransferCotaNFTV2EntriesBuilder) Build() TransferCotaNFTV2Entries {
+	b := new(bytes.Buffer)
+
+	totalSize := HeaderSizeUint * (11 + 1)
+	offsets := make([]uint32, 0, 11)
+
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.claim_keys.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.claim_values.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.withdrawal_keys.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.withdrawal_values.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.proof.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.action.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.withdrawal_proof.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.leaf_keys.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.leaf_values.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.raw_tx.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.tx_proof.AsSlice()))
+
+	b.Write(packNumber(Number(totalSize)))
+
+	for i := 0; i < len(offsets); i++ {
+		b.Write(packNumber(Number(offsets[i])))
+	}
+
+	b.Write(s.claim_keys.AsSlice())
+	b.Write(s.claim_values.AsSlice())
+	b.Write(s.withdrawal_keys.AsSlice())
+	b.Write(s.withdrawal_values.AsSlice())
+	b.Write(s.proof.AsSlice())
+	b.Write(s.action.AsSlice())
+	b.Write(s.withdrawal_proof.AsSlice())
+	b.Write(s.leaf_keys.AsSlice())
+	b.Write(s.leaf_values.AsSlice())
+	b.Write(s.raw_tx.AsSlice())
+	b.Write(s.tx_proof.AsSlice())
+	return TransferCotaNFTV2Entries{inner: b.Bytes()}
+}
+
+func (s *TransferCotaNFTV2EntriesBuilder) ClaimKeys(v ClaimCotaNFTKeyVec) *TransferCotaNFTV2EntriesBuilder {
+	s.claim_keys = v
+	return s
+}
+
+func (s *TransferCotaNFTV2EntriesBuilder) ClaimValues(v ClaimCotaNFTValueVec) *TransferCotaNFTV2EntriesBuilder {
+	s.claim_values = v
+	return s
+}
+
+func (s *TransferCotaNFTV2EntriesBuilder) WithdrawalKeys(v WithdrawalCotaNFTKeyV1Vec) *TransferCotaNFTV2EntriesBuilder {
+	s.withdrawal_keys = v
+	return s
+}
+
+func (s *TransferCotaNFTV2EntriesBuilder) WithdrawalValues(v WithdrawalCotaNFTValueV1Vec) *TransferCotaNFTV2EntriesBuilder {
+	s.withdrawal_values = v
+	return s
+}
+
+func (s *TransferCotaNFTV2EntriesBuilder) Proof(v Bytes) *TransferCotaNFTV2EntriesBuilder {
+	s.proof = v
+	return s
+}
+
+func (s *TransferCotaNFTV2EntriesBuilder) Action(v Bytes) *TransferCotaNFTV2EntriesBuilder {
+	s.action = v
+	return s
+}
+
+func (s *TransferCotaNFTV2EntriesBuilder) WithdrawalProof(v Bytes) *TransferCotaNFTV2EntriesBuilder {
+	s.withdrawal_proof = v
+	return s
+}
+
+func (s *TransferCotaNFTV2EntriesBuilder) LeafKeys(v Byte32Vec) *TransferCotaNFTV2EntriesBuilder {
+	s.leaf_keys = v
+	return s
+}
+
+func (s *TransferCotaNFTV2EntriesBuilder) LeafValues(v Byte32Vec) *TransferCotaNFTV2EntriesBuilder {
+	s.leaf_values = v
+	return s
+}
+
+func (s *TransferCotaNFTV2EntriesBuilder) RawTx(v Bytes) *TransferCotaNFTV2EntriesBuilder {
+	s.raw_tx = v
+	return s
+}
+
+func (s *TransferCotaNFTV2EntriesBuilder) TxProof(v TransactionProof) *TransferCotaNFTV2EntriesBuilder {
+	s.tx_proof = v
+	return s
+}
+
+func NewTransferCotaNFTV2EntriesBuilder() *TransferCotaNFTV2EntriesBuilder {
+	return &TransferCotaNFTV2EntriesBuilder{claim_keys: ClaimCotaNFTKeyVecDefault(), claim_values: ClaimCotaNFTValueVecDefault(), withdrawal_keys: WithdrawalCotaNFTKeyV1VecDefault(), withdrawal_values: WithdrawalCotaNFTValueV1VecDefault(), proof: BytesDefault(), action: BytesDefault(), withdrawal_proof: BytesDefault(), leaf_keys: Byte32VecDefault(), leaf_values: Byte32VecDefault(), raw_tx: BytesDefault(), tx_proof: TransactionProofDefault()}
+}
+
+type TransferCotaNFTV2Entries struct {
+	inner []byte
+}
+
+func TransferCotaNFTV2EntriesFromSliceUnchecked(slice []byte) *TransferCotaNFTV2Entries {
+	return &TransferCotaNFTV2Entries{inner: slice}
+}
+func (s *TransferCotaNFTV2Entries) AsSlice() []byte {
+	return s.inner
+}
+
+func TransferCotaNFTV2EntriesDefault() TransferCotaNFTV2Entries {
+	return *TransferCotaNFTV2EntriesFromSliceUnchecked([]byte{152, 0, 0, 0, 48, 0, 0, 0, 52, 0, 0, 0, 56, 0, 0, 0, 60, 0, 0, 0, 64, 0, 0, 0, 68, 0, 0, 0, 72, 0, 0, 0, 76, 0, 0, 0, 80, 0, 0, 0, 84, 0, 0, 0, 88, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 12, 0, 0, 0, 44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 12, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
+}
+
+func TransferCotaNFTV2EntriesFromSlice(slice []byte, compatible bool) (*TransferCotaNFTV2Entries, error) {
+	sliceLen := len(slice)
+	if uint32(sliceLen) < HeaderSizeUint {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "TransferCotaNFTV2Entries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	totalSize := unpackNumber(slice)
+	if Number(sliceLen) != totalSize {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "TransferCotaNFTV2Entries", strconv.Itoa(int(sliceLen)), "!=", strconv.Itoa(int(totalSize))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if uint32(sliceLen) == HeaderSizeUint && 11 == 0 {
+		return &TransferCotaNFTV2Entries{inner: slice}, nil
+	}
+
+	if uint32(sliceLen) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "TransferCotaNFTV2Entries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	offsetFirst := unpackNumber(slice[HeaderSizeUint:])
+	if uint32(offsetFirst)%HeaderSizeUint != 0 || uint32(offsetFirst) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"OffsetsNotMatch", "TransferCotaNFTV2Entries", strconv.Itoa(int(offsetFirst % 4)), "!= 0", strconv.Itoa(int(offsetFirst)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if sliceLen < int(offsetFirst) {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "TransferCotaNFTV2Entries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(offsetFirst))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	fieldCount := uint32(offsetFirst)/HeaderSizeUint - 1
+	if fieldCount < 11 {
+		return nil, errors.New("FieldCountNotMatch")
+	} else if !compatible && fieldCount > 11 {
+		return nil, errors.New("FieldCountNotMatch")
+	}
+
+	offsets := make([]uint32, fieldCount)
+
+	for i := 0; i < int(fieldCount); i++ {
+		offsets[i] = uint32(unpackNumber(slice[HeaderSizeUint:][int(HeaderSizeUint)*i:]))
+	}
+	offsets = append(offsets, uint32(totalSize))
+
+	for i := 0; i < len(offsets); i++ {
+		if i&1 != 0 && offsets[i-1] > offsets[i] {
+			return nil, errors.New("OffsetsNotMatch")
+		}
+	}
+
+	var err error
+
+	_, err = ClaimCotaNFTKeyVecFromSlice(slice[offsets[0]:offsets[1]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = ClaimCotaNFTValueVecFromSlice(slice[offsets[1]:offsets[2]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = WithdrawalCotaNFTKeyV1VecFromSlice(slice[offsets[2]:offsets[3]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = WithdrawalCotaNFTValueV1VecFromSlice(slice[offsets[3]:offsets[4]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[4]:offsets[5]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[5]:offsets[6]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[6]:offsets[7]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = Byte32VecFromSlice(slice[offsets[7]:offsets[8]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = Byte32VecFromSlice(slice[offsets[8]:offsets[9]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[9]:offsets[10]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = TransactionProofFromSlice(slice[offsets[10]:offsets[11]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	return &TransferCotaNFTV2Entries{inner: slice}, nil
+}
+
+func (s *TransferCotaNFTV2Entries) TotalSize() uint {
+	return uint(unpackNumber(s.inner))
+}
+func (s *TransferCotaNFTV2Entries) FieldCount() uint {
+	var number uint = 0
+	if uint32(s.TotalSize()) == HeaderSizeUint {
+		return number
+	}
+	number = uint(unpackNumber(s.inner[HeaderSizeUint:]))/4 - 1
+	return number
+}
+func (s *TransferCotaNFTV2Entries) Len() uint {
+	return s.FieldCount()
+}
+func (s *TransferCotaNFTV2Entries) IsEmpty() bool {
+	return s.Len() == 0
+}
+func (s *TransferCotaNFTV2Entries) CountExtraFields() uint {
+	return s.FieldCount() - 11
+}
+
+func (s *TransferCotaNFTV2Entries) HasExtraFields() bool {
+	return 11 != s.FieldCount()
+}
+
+func (s *TransferCotaNFTV2Entries) ClaimKeys() *ClaimCotaNFTKeyVec {
+	start := unpackNumber(s.inner[4:])
+	end := unpackNumber(s.inner[8:])
+	return ClaimCotaNFTKeyVecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferCotaNFTV2Entries) ClaimValues() *ClaimCotaNFTValueVec {
+	start := unpackNumber(s.inner[8:])
+	end := unpackNumber(s.inner[12:])
+	return ClaimCotaNFTValueVecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferCotaNFTV2Entries) WithdrawalKeys() *WithdrawalCotaNFTKeyV1Vec {
+	start := unpackNumber(s.inner[12:])
+	end := unpackNumber(s.inner[16:])
+	return WithdrawalCotaNFTKeyV1VecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferCotaNFTV2Entries) WithdrawalValues() *WithdrawalCotaNFTValueV1Vec {
+	start := unpackNumber(s.inner[16:])
+	end := unpackNumber(s.inner[20:])
+	return WithdrawalCotaNFTValueV1VecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferCotaNFTV2Entries) Proof() *Bytes {
+	start := unpackNumber(s.inner[20:])
+	end := unpackNumber(s.inner[24:])
+	return BytesFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferCotaNFTV2Entries) Action() *Bytes {
+	start := unpackNumber(s.inner[24:])
+	end := unpackNumber(s.inner[28:])
+	return BytesFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferCotaNFTV2Entries) WithdrawalProof() *Bytes {
+	start := unpackNumber(s.inner[28:])
+	end := unpackNumber(s.inner[32:])
+	return BytesFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferCotaNFTV2Entries) LeafKeys() *Byte32Vec {
+	start := unpackNumber(s.inner[32:])
+	end := unpackNumber(s.inner[36:])
+	return Byte32VecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferCotaNFTV2Entries) LeafValues() *Byte32Vec {
+	start := unpackNumber(s.inner[36:])
+	end := unpackNumber(s.inner[40:])
+	return Byte32VecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferCotaNFTV2Entries) RawTx() *Bytes {
+	start := unpackNumber(s.inner[40:])
+	end := unpackNumber(s.inner[44:])
+	return BytesFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferCotaNFTV2Entries) TxProof() *TransactionProof {
+	var ret *TransactionProof
+	start := unpackNumber(s.inner[44:])
+	if s.HasExtraFields() {
+		end := unpackNumber(s.inner[48:])
+		ret = TransactionProofFromSliceUnchecked(s.inner[start:end])
+	} else {
+		ret = TransactionProofFromSliceUnchecked(s.inner[start:])
+	}
+	return ret
+}
+
+func (s *TransferCotaNFTV2Entries) AsBuilder() TransferCotaNFTV2EntriesBuilder {
+	ret := NewTransferCotaNFTV2EntriesBuilder().ClaimKeys(*s.ClaimKeys()).ClaimValues(*s.ClaimValues()).WithdrawalKeys(*s.WithdrawalKeys()).WithdrawalValues(*s.WithdrawalValues()).Proof(*s.Proof()).Action(*s.Action()).WithdrawalProof(*s.WithdrawalProof()).LeafKeys(*s.LeafKeys()).LeafValues(*s.LeafValues()).RawTx(*s.RawTx()).TxProof(*s.TxProof())
+	return *ret
+}
+
+type ClaimUpdateCotaNFTV2EntriesBuilder struct {
+	hold_keys        HoldCotaNFTKeyVec
+	hold_values      HoldCotaNFTValueVec
+	claim_keys       ClaimCotaNFTKeyVec
+	claim_infos      ClaimCotaNFTInfoVec
+	proof            Bytes
+	action           Bytes
+	withdrawal_proof Bytes
+	leaf_keys        Byte32Vec
+	leaf_values      Byte32Vec
+	raw_tx           Bytes
+	tx_proof         TransactionProof
+}
+
+func (s *ClaimUpdateCotaNFTV2EntriesBuilder) Build() ClaimUpdateCotaNFTV2Entries {
+	b := new(bytes.Buffer)
+
+	totalSize := HeaderSizeUint * (11 + 1)
+	offsets := make([]uint32, 0, 11)
+
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.hold_keys.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.hold_values.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.claim_keys.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.claim_infos.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.proof.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.action.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.withdrawal_proof.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.leaf_keys.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.leaf_values.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.raw_tx.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.tx_proof.AsSlice()))
+
+	b.Write(packNumber(Number(totalSize)))
+
+	for i := 0; i < len(offsets); i++ {
+		b.Write(packNumber(Number(offsets[i])))
+	}
+
+	b.Write(s.hold_keys.AsSlice())
+	b.Write(s.hold_values.AsSlice())
+	b.Write(s.claim_keys.AsSlice())
+	b.Write(s.claim_infos.AsSlice())
+	b.Write(s.proof.AsSlice())
+	b.Write(s.action.AsSlice())
+	b.Write(s.withdrawal_proof.AsSlice())
+	b.Write(s.leaf_keys.AsSlice())
+	b.Write(s.leaf_values.AsSlice())
+	b.Write(s.raw_tx.AsSlice())
+	b.Write(s.tx_proof.AsSlice())
+	return ClaimUpdateCotaNFTV2Entries{inner: b.Bytes()}
+}
+
+func (s *ClaimUpdateCotaNFTV2EntriesBuilder) HoldKeys(v HoldCotaNFTKeyVec) *ClaimUpdateCotaNFTV2EntriesBuilder {
+	s.hold_keys = v
+	return s
+}
+
+func (s *ClaimUpdateCotaNFTV2EntriesBuilder) HoldValues(v HoldCotaNFTValueVec) *ClaimUpdateCotaNFTV2EntriesBuilder {
+	s.hold_values = v
+	return s
+}
+
+func (s *ClaimUpdateCotaNFTV2EntriesBuilder) ClaimKeys(v ClaimCotaNFTKeyVec) *ClaimUpdateCotaNFTV2EntriesBuilder {
+	s.claim_keys = v
+	return s
+}
+
+func (s *ClaimUpdateCotaNFTV2EntriesBuilder) ClaimInfos(v ClaimCotaNFTInfoVec) *ClaimUpdateCotaNFTV2EntriesBuilder {
+	s.claim_infos = v
+	return s
+}
+
+func (s *ClaimUpdateCotaNFTV2EntriesBuilder) Proof(v Bytes) *ClaimUpdateCotaNFTV2EntriesBuilder {
+	s.proof = v
+	return s
+}
+
+func (s *ClaimUpdateCotaNFTV2EntriesBuilder) Action(v Bytes) *ClaimUpdateCotaNFTV2EntriesBuilder {
+	s.action = v
+	return s
+}
+
+func (s *ClaimUpdateCotaNFTV2EntriesBuilder) WithdrawalProof(v Bytes) *ClaimUpdateCotaNFTV2EntriesBuilder {
+	s.withdrawal_proof = v
+	return s
+}
+
+func (s *ClaimUpdateCotaNFTV2EntriesBuilder) LeafKeys(v Byte32Vec) *ClaimUpdateCotaNFTV2EntriesBuilder {
+	s.leaf_keys = v
+	return s
+}
+
+func (s *ClaimUpdateCotaNFTV2EntriesBuilder) LeafValues(v Byte32Vec) *ClaimUpdateCotaNFTV2EntriesBuilder {
+	s.leaf_values = v
+	return s
+}
+
+func (s *ClaimUpdateCotaNFTV2EntriesBuilder) RawTx(v Bytes) *ClaimUpdateCotaNFTV2EntriesBuilder {
+	s.raw_tx = v
+	return s
+}
+
+func (s *ClaimUpdateCotaNFTV2EntriesBuilder) TxProof(v TransactionProof) *ClaimUpdateCotaNFTV2EntriesBuilder {
+	s.tx_proof = v
+	return s
+}
+
+func NewClaimUpdateCotaNFTV2EntriesBuilder() *ClaimUpdateCotaNFTV2EntriesBuilder {
+	return &ClaimUpdateCotaNFTV2EntriesBuilder{hold_keys: HoldCotaNFTKeyVecDefault(), hold_values: HoldCotaNFTValueVecDefault(), claim_keys: ClaimCotaNFTKeyVecDefault(), claim_infos: ClaimCotaNFTInfoVecDefault(), proof: BytesDefault(), action: BytesDefault(), withdrawal_proof: BytesDefault(), leaf_keys: Byte32VecDefault(), leaf_values: Byte32VecDefault(), raw_tx: BytesDefault(), tx_proof: TransactionProofDefault()}
+}
+
+type ClaimUpdateCotaNFTV2Entries struct {
+	inner []byte
+}
+
+func ClaimUpdateCotaNFTV2EntriesFromSliceUnchecked(slice []byte) *ClaimUpdateCotaNFTV2Entries {
+	return &ClaimUpdateCotaNFTV2Entries{inner: slice}
+}
+func (s *ClaimUpdateCotaNFTV2Entries) AsSlice() []byte {
+	return s.inner
+}
+
+func ClaimUpdateCotaNFTV2EntriesDefault() ClaimUpdateCotaNFTV2Entries {
+	return *ClaimUpdateCotaNFTV2EntriesFromSliceUnchecked([]byte{152, 0, 0, 0, 48, 0, 0, 0, 52, 0, 0, 0, 56, 0, 0, 0, 60, 0, 0, 0, 64, 0, 0, 0, 68, 0, 0, 0, 72, 0, 0, 0, 76, 0, 0, 0, 80, 0, 0, 0, 84, 0, 0, 0, 88, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 12, 0, 0, 0, 44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 12, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
+}
+
+func ClaimUpdateCotaNFTV2EntriesFromSlice(slice []byte, compatible bool) (*ClaimUpdateCotaNFTV2Entries, error) {
+	sliceLen := len(slice)
+	if uint32(sliceLen) < HeaderSizeUint {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "ClaimUpdateCotaNFTV2Entries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	totalSize := unpackNumber(slice)
+	if Number(sliceLen) != totalSize {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "ClaimUpdateCotaNFTV2Entries", strconv.Itoa(int(sliceLen)), "!=", strconv.Itoa(int(totalSize))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if uint32(sliceLen) == HeaderSizeUint && 11 == 0 {
+		return &ClaimUpdateCotaNFTV2Entries{inner: slice}, nil
+	}
+
+	if uint32(sliceLen) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "ClaimUpdateCotaNFTV2Entries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	offsetFirst := unpackNumber(slice[HeaderSizeUint:])
+	if uint32(offsetFirst)%HeaderSizeUint != 0 || uint32(offsetFirst) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"OffsetsNotMatch", "ClaimUpdateCotaNFTV2Entries", strconv.Itoa(int(offsetFirst % 4)), "!= 0", strconv.Itoa(int(offsetFirst)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if sliceLen < int(offsetFirst) {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "ClaimUpdateCotaNFTV2Entries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(offsetFirst))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	fieldCount := uint32(offsetFirst)/HeaderSizeUint - 1
+	if fieldCount < 11 {
+		return nil, errors.New("FieldCountNotMatch")
+	} else if !compatible && fieldCount > 11 {
+		return nil, errors.New("FieldCountNotMatch")
+	}
+
+	offsets := make([]uint32, fieldCount)
+
+	for i := 0; i < int(fieldCount); i++ {
+		offsets[i] = uint32(unpackNumber(slice[HeaderSizeUint:][int(HeaderSizeUint)*i:]))
+	}
+	offsets = append(offsets, uint32(totalSize))
+
+	for i := 0; i < len(offsets); i++ {
+		if i&1 != 0 && offsets[i-1] > offsets[i] {
+			return nil, errors.New("OffsetsNotMatch")
+		}
+	}
+
+	var err error
+
+	_, err = HoldCotaNFTKeyVecFromSlice(slice[offsets[0]:offsets[1]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = HoldCotaNFTValueVecFromSlice(slice[offsets[1]:offsets[2]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = ClaimCotaNFTKeyVecFromSlice(slice[offsets[2]:offsets[3]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = ClaimCotaNFTInfoVecFromSlice(slice[offsets[3]:offsets[4]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[4]:offsets[5]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[5]:offsets[6]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[6]:offsets[7]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = Byte32VecFromSlice(slice[offsets[7]:offsets[8]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = Byte32VecFromSlice(slice[offsets[8]:offsets[9]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[9]:offsets[10]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = TransactionProofFromSlice(slice[offsets[10]:offsets[11]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ClaimUpdateCotaNFTV2Entries{inner: slice}, nil
+}
+
+func (s *ClaimUpdateCotaNFTV2Entries) TotalSize() uint {
+	return uint(unpackNumber(s.inner))
+}
+func (s *ClaimUpdateCotaNFTV2Entries) FieldCount() uint {
+	var number uint = 0
+	if uint32(s.TotalSize()) == HeaderSizeUint {
+		return number
+	}
+	number = uint(unpackNumber(s.inner[HeaderSizeUint:]))/4 - 1
+	return number
+}
+func (s *ClaimUpdateCotaNFTV2Entries) Len() uint {
+	return s.FieldCount()
+}
+func (s *ClaimUpdateCotaNFTV2Entries) IsEmpty() bool {
+	return s.Len() == 0
+}
+func (s *ClaimUpdateCotaNFTV2Entries) CountExtraFields() uint {
+	return s.FieldCount() - 11
+}
+
+func (s *ClaimUpdateCotaNFTV2Entries) HasExtraFields() bool {
+	return 11 != s.FieldCount()
+}
+
+func (s *ClaimUpdateCotaNFTV2Entries) HoldKeys() *HoldCotaNFTKeyVec {
+	start := unpackNumber(s.inner[4:])
+	end := unpackNumber(s.inner[8:])
+	return HoldCotaNFTKeyVecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *ClaimUpdateCotaNFTV2Entries) HoldValues() *HoldCotaNFTValueVec {
+	start := unpackNumber(s.inner[8:])
+	end := unpackNumber(s.inner[12:])
+	return HoldCotaNFTValueVecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *ClaimUpdateCotaNFTV2Entries) ClaimKeys() *ClaimCotaNFTKeyVec {
+	start := unpackNumber(s.inner[12:])
+	end := unpackNumber(s.inner[16:])
+	return ClaimCotaNFTKeyVecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *ClaimUpdateCotaNFTV2Entries) ClaimInfos() *ClaimCotaNFTInfoVec {
+	start := unpackNumber(s.inner[16:])
+	end := unpackNumber(s.inner[20:])
+	return ClaimCotaNFTInfoVecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *ClaimUpdateCotaNFTV2Entries) Proof() *Bytes {
+	start := unpackNumber(s.inner[20:])
+	end := unpackNumber(s.inner[24:])
+	return BytesFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *ClaimUpdateCotaNFTV2Entries) Action() *Bytes {
+	start := unpackNumber(s.inner[24:])
+	end := unpackNumber(s.inner[28:])
+	return BytesFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *ClaimUpdateCotaNFTV2Entries) WithdrawalProof() *Bytes {
+	start := unpackNumber(s.inner[28:])
+	end := unpackNumber(s.inner[32:])
+	return BytesFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *ClaimUpdateCotaNFTV2Entries) LeafKeys() *Byte32Vec {
+	start := unpackNumber(s.inner[32:])
+	end := unpackNumber(s.inner[36:])
+	return Byte32VecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *ClaimUpdateCotaNFTV2Entries) LeafValues() *Byte32Vec {
+	start := unpackNumber(s.inner[36:])
+	end := unpackNumber(s.inner[40:])
+	return Byte32VecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *ClaimUpdateCotaNFTV2Entries) RawTx() *Bytes {
+	start := unpackNumber(s.inner[40:])
+	end := unpackNumber(s.inner[44:])
+	return BytesFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *ClaimUpdateCotaNFTV2Entries) TxProof() *TransactionProof {
+	var ret *TransactionProof
+	start := unpackNumber(s.inner[44:])
+	if s.HasExtraFields() {
+		end := unpackNumber(s.inner[48:])
+		ret = TransactionProofFromSliceUnchecked(s.inner[start:end])
+	} else {
+		ret = TransactionProofFromSliceUnchecked(s.inner[start:])
+	}
+	return ret
+}
+
+func (s *ClaimUpdateCotaNFTV2Entries) AsBuilder() ClaimUpdateCotaNFTV2EntriesBuilder {
+	ret := NewClaimUpdateCotaNFTV2EntriesBuilder().HoldKeys(*s.HoldKeys()).HoldValues(*s.HoldValues()).ClaimKeys(*s.ClaimKeys()).ClaimInfos(*s.ClaimInfos()).Proof(*s.Proof()).Action(*s.Action()).WithdrawalProof(*s.WithdrawalProof()).LeafKeys(*s.LeafKeys()).LeafValues(*s.LeafValues()).RawTx(*s.RawTx()).TxProof(*s.TxProof())
+	return *ret
+}
+
+type TransferUpdateCotaNFTV2EntriesBuilder struct {
+	claim_keys        ClaimCotaNFTKeyVec
+	claim_infos       ClaimCotaNFTInfoVec
+	withdrawal_keys   WithdrawalCotaNFTKeyV1Vec
+	withdrawal_values WithdrawalCotaNFTValueV1Vec
+	proof             Bytes
+	action            Bytes
+	withdrawal_proof  Bytes
+	leaf_keys         Byte32Vec
+	leaf_values       Byte32Vec
+	raw_tx            Bytes
+	tx_proof          TransactionProof
+}
+
+func (s *TransferUpdateCotaNFTV2EntriesBuilder) Build() TransferUpdateCotaNFTV2Entries {
+	b := new(bytes.Buffer)
+
+	totalSize := HeaderSizeUint * (11 + 1)
+	offsets := make([]uint32, 0, 11)
+
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.claim_keys.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.claim_infos.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.withdrawal_keys.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.withdrawal_values.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.proof.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.action.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.withdrawal_proof.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.leaf_keys.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.leaf_values.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.raw_tx.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.tx_proof.AsSlice()))
+
+	b.Write(packNumber(Number(totalSize)))
+
+	for i := 0; i < len(offsets); i++ {
+		b.Write(packNumber(Number(offsets[i])))
+	}
+
+	b.Write(s.claim_keys.AsSlice())
+	b.Write(s.claim_infos.AsSlice())
+	b.Write(s.withdrawal_keys.AsSlice())
+	b.Write(s.withdrawal_values.AsSlice())
+	b.Write(s.proof.AsSlice())
+	b.Write(s.action.AsSlice())
+	b.Write(s.withdrawal_proof.AsSlice())
+	b.Write(s.leaf_keys.AsSlice())
+	b.Write(s.leaf_values.AsSlice())
+	b.Write(s.raw_tx.AsSlice())
+	b.Write(s.tx_proof.AsSlice())
+	return TransferUpdateCotaNFTV2Entries{inner: b.Bytes()}
+}
+
+func (s *TransferUpdateCotaNFTV2EntriesBuilder) ClaimKeys(v ClaimCotaNFTKeyVec) *TransferUpdateCotaNFTV2EntriesBuilder {
+	s.claim_keys = v
+	return s
+}
+
+func (s *TransferUpdateCotaNFTV2EntriesBuilder) ClaimInfos(v ClaimCotaNFTInfoVec) *TransferUpdateCotaNFTV2EntriesBuilder {
+	s.claim_infos = v
+	return s
+}
+
+func (s *TransferUpdateCotaNFTV2EntriesBuilder) WithdrawalKeys(v WithdrawalCotaNFTKeyV1Vec) *TransferUpdateCotaNFTV2EntriesBuilder {
+	s.withdrawal_keys = v
+	return s
+}
+
+func (s *TransferUpdateCotaNFTV2EntriesBuilder) WithdrawalValues(v WithdrawalCotaNFTValueV1Vec) *TransferUpdateCotaNFTV2EntriesBuilder {
+	s.withdrawal_values = v
+	return s
+}
+
+func (s *TransferUpdateCotaNFTV2EntriesBuilder) Proof(v Bytes) *TransferUpdateCotaNFTV2EntriesBuilder {
+	s.proof = v
+	return s
+}
+
+func (s *TransferUpdateCotaNFTV2EntriesBuilder) Action(v Bytes) *TransferUpdateCotaNFTV2EntriesBuilder {
+	s.action = v
+	return s
+}
+
+func (s *TransferUpdateCotaNFTV2EntriesBuilder) WithdrawalProof(v Bytes) *TransferUpdateCotaNFTV2EntriesBuilder {
+	s.withdrawal_proof = v
+	return s
+}
+
+func (s *TransferUpdateCotaNFTV2EntriesBuilder) LeafKeys(v Byte32Vec) *TransferUpdateCotaNFTV2EntriesBuilder {
+	s.leaf_keys = v
+	return s
+}
+
+func (s *TransferUpdateCotaNFTV2EntriesBuilder) LeafValues(v Byte32Vec) *TransferUpdateCotaNFTV2EntriesBuilder {
+	s.leaf_values = v
+	return s
+}
+
+func (s *TransferUpdateCotaNFTV2EntriesBuilder) RawTx(v Bytes) *TransferUpdateCotaNFTV2EntriesBuilder {
+	s.raw_tx = v
+	return s
+}
+
+func (s *TransferUpdateCotaNFTV2EntriesBuilder) TxProof(v TransactionProof) *TransferUpdateCotaNFTV2EntriesBuilder {
+	s.tx_proof = v
+	return s
+}
+
+func NewTransferUpdateCotaNFTV2EntriesBuilder() *TransferUpdateCotaNFTV2EntriesBuilder {
+	return &TransferUpdateCotaNFTV2EntriesBuilder{claim_keys: ClaimCotaNFTKeyVecDefault(), claim_infos: ClaimCotaNFTInfoVecDefault(), withdrawal_keys: WithdrawalCotaNFTKeyV1VecDefault(), withdrawal_values: WithdrawalCotaNFTValueV1VecDefault(), proof: BytesDefault(), action: BytesDefault(), withdrawal_proof: BytesDefault(), leaf_keys: Byte32VecDefault(), leaf_values: Byte32VecDefault(), raw_tx: BytesDefault(), tx_proof: TransactionProofDefault()}
+}
+
+type TransferUpdateCotaNFTV2Entries struct {
+	inner []byte
+}
+
+func TransferUpdateCotaNFTV2EntriesFromSliceUnchecked(slice []byte) *TransferUpdateCotaNFTV2Entries {
+	return &TransferUpdateCotaNFTV2Entries{inner: slice}
+}
+func (s *TransferUpdateCotaNFTV2Entries) AsSlice() []byte {
+	return s.inner
+}
+
+func TransferUpdateCotaNFTV2EntriesDefault() TransferUpdateCotaNFTV2Entries {
+	return *TransferUpdateCotaNFTV2EntriesFromSliceUnchecked([]byte{152, 0, 0, 0, 48, 0, 0, 0, 52, 0, 0, 0, 56, 0, 0, 0, 60, 0, 0, 0, 64, 0, 0, 0, 68, 0, 0, 0, 72, 0, 0, 0, 76, 0, 0, 0, 80, 0, 0, 0, 84, 0, 0, 0, 88, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 12, 0, 0, 0, 44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 12, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
+}
+
+func TransferUpdateCotaNFTV2EntriesFromSlice(slice []byte, compatible bool) (*TransferUpdateCotaNFTV2Entries, error) {
+	sliceLen := len(slice)
+	if uint32(sliceLen) < HeaderSizeUint {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "TransferUpdateCotaNFTV2Entries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	totalSize := unpackNumber(slice)
+	if Number(sliceLen) != totalSize {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "TransferUpdateCotaNFTV2Entries", strconv.Itoa(int(sliceLen)), "!=", strconv.Itoa(int(totalSize))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if uint32(sliceLen) == HeaderSizeUint && 11 == 0 {
+		return &TransferUpdateCotaNFTV2Entries{inner: slice}, nil
+	}
+
+	if uint32(sliceLen) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "TransferUpdateCotaNFTV2Entries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	offsetFirst := unpackNumber(slice[HeaderSizeUint:])
+	if uint32(offsetFirst)%HeaderSizeUint != 0 || uint32(offsetFirst) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"OffsetsNotMatch", "TransferUpdateCotaNFTV2Entries", strconv.Itoa(int(offsetFirst % 4)), "!= 0", strconv.Itoa(int(offsetFirst)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if sliceLen < int(offsetFirst) {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "TransferUpdateCotaNFTV2Entries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(offsetFirst))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	fieldCount := uint32(offsetFirst)/HeaderSizeUint - 1
+	if fieldCount < 11 {
+		return nil, errors.New("FieldCountNotMatch")
+	} else if !compatible && fieldCount > 11 {
+		return nil, errors.New("FieldCountNotMatch")
+	}
+
+	offsets := make([]uint32, fieldCount)
+
+	for i := 0; i < int(fieldCount); i++ {
+		offsets[i] = uint32(unpackNumber(slice[HeaderSizeUint:][int(HeaderSizeUint)*i:]))
+	}
+	offsets = append(offsets, uint32(totalSize))
+
+	for i := 0; i < len(offsets); i++ {
+		if i&1 != 0 && offsets[i-1] > offsets[i] {
+			return nil, errors.New("OffsetsNotMatch")
+		}
+	}
+
+	var err error
+
+	_, err = ClaimCotaNFTKeyVecFromSlice(slice[offsets[0]:offsets[1]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = ClaimCotaNFTInfoVecFromSlice(slice[offsets[1]:offsets[2]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = WithdrawalCotaNFTKeyV1VecFromSlice(slice[offsets[2]:offsets[3]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = WithdrawalCotaNFTValueV1VecFromSlice(slice[offsets[3]:offsets[4]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[4]:offsets[5]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[5]:offsets[6]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[6]:offsets[7]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = Byte32VecFromSlice(slice[offsets[7]:offsets[8]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = Byte32VecFromSlice(slice[offsets[8]:offsets[9]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[9]:offsets[10]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = TransactionProofFromSlice(slice[offsets[10]:offsets[11]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	return &TransferUpdateCotaNFTV2Entries{inner: slice}, nil
+}
+
+func (s *TransferUpdateCotaNFTV2Entries) TotalSize() uint {
+	return uint(unpackNumber(s.inner))
+}
+func (s *TransferUpdateCotaNFTV2Entries) FieldCount() uint {
+	var number uint = 0
+	if uint32(s.TotalSize()) == HeaderSizeUint {
+		return number
+	}
+	number = uint(unpackNumber(s.inner[HeaderSizeUint:]))/4 - 1
+	return number
+}
+func (s *TransferUpdateCotaNFTV2Entries) Len() uint {
+	return s.FieldCount()
+}
+func (s *TransferUpdateCotaNFTV2Entries) IsEmpty() bool {
+	return s.Len() == 0
+}
+func (s *TransferUpdateCotaNFTV2Entries) CountExtraFields() uint {
+	return s.FieldCount() - 11
+}
+
+func (s *TransferUpdateCotaNFTV2Entries) HasExtraFields() bool {
+	return 11 != s.FieldCount()
+}
+
+func (s *TransferUpdateCotaNFTV2Entries) ClaimKeys() *ClaimCotaNFTKeyVec {
+	start := unpackNumber(s.inner[4:])
+	end := unpackNumber(s.inner[8:])
+	return ClaimCotaNFTKeyVecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferUpdateCotaNFTV2Entries) ClaimInfos() *ClaimCotaNFTInfoVec {
+	start := unpackNumber(s.inner[8:])
+	end := unpackNumber(s.inner[12:])
+	return ClaimCotaNFTInfoVecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferUpdateCotaNFTV2Entries) WithdrawalKeys() *WithdrawalCotaNFTKeyV1Vec {
+	start := unpackNumber(s.inner[12:])
+	end := unpackNumber(s.inner[16:])
+	return WithdrawalCotaNFTKeyV1VecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferUpdateCotaNFTV2Entries) WithdrawalValues() *WithdrawalCotaNFTValueV1Vec {
+	start := unpackNumber(s.inner[16:])
+	end := unpackNumber(s.inner[20:])
+	return WithdrawalCotaNFTValueV1VecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferUpdateCotaNFTV2Entries) Proof() *Bytes {
+	start := unpackNumber(s.inner[20:])
+	end := unpackNumber(s.inner[24:])
+	return BytesFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferUpdateCotaNFTV2Entries) Action() *Bytes {
+	start := unpackNumber(s.inner[24:])
+	end := unpackNumber(s.inner[28:])
+	return BytesFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferUpdateCotaNFTV2Entries) WithdrawalProof() *Bytes {
+	start := unpackNumber(s.inner[28:])
+	end := unpackNumber(s.inner[32:])
+	return BytesFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferUpdateCotaNFTV2Entries) LeafKeys() *Byte32Vec {
+	start := unpackNumber(s.inner[32:])
+	end := unpackNumber(s.inner[36:])
+	return Byte32VecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferUpdateCotaNFTV2Entries) LeafValues() *Byte32Vec {
+	start := unpackNumber(s.inner[36:])
+	end := unpackNumber(s.inner[40:])
+	return Byte32VecFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferUpdateCotaNFTV2Entries) RawTx() *Bytes {
+	start := unpackNumber(s.inner[40:])
+	end := unpackNumber(s.inner[44:])
+	return BytesFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *TransferUpdateCotaNFTV2Entries) TxProof() *TransactionProof {
+	var ret *TransactionProof
+	start := unpackNumber(s.inner[44:])
+	if s.HasExtraFields() {
+		end := unpackNumber(s.inner[48:])
+		ret = TransactionProofFromSliceUnchecked(s.inner[start:end])
+	} else {
+		ret = TransactionProofFromSliceUnchecked(s.inner[start:])
+	}
+	return ret
+}
+
+func (s *TransferUpdateCotaNFTV2Entries) AsBuilder() TransferUpdateCotaNFTV2EntriesBuilder {
+	ret := NewTransferUpdateCotaNFTV2EntriesBuilder().ClaimKeys(*s.ClaimKeys()).ClaimInfos(*s.ClaimInfos()).WithdrawalKeys(*s.WithdrawalKeys()).WithdrawalValues(*s.WithdrawalValues()).Proof(*s.Proof()).Action(*s.Action()).WithdrawalProof(*s.WithdrawalProof()).LeafKeys(*s.LeafKeys()).LeafValues(*s.LeafValues()).RawTx(*s.RawTx()).TxProof(*s.TxProof())
 	return *ret
 }
