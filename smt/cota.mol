@@ -294,49 +294,6 @@ table TransferUpdateCotaNFTV2Entries {
   tx_proof: TransactionProof,
 }
 
-
-// SubKeys
-struct SubKey {
-  smt_type: Uint16,
-  sub_type: Byte6,
-  ext_data: Uint32,
-  reserved: Byte20,
-}
-struct SubValue {
-  key_type: Uint16,
-  pubkey_hash: Byte20,
-  reserved: Byte9,
-  padding: byte,
-}
-vector SubKeyVec <SubKey>;
-vector SubValueVec <SubValue>;
-table SubKeyEntry {
-  keys: SubKeyVec,
-  values: SubValueVec,
-}
-option SubKeyEntryOpt (SubKeyEntry);
-
-
-// Social Recovery
-struct SocialKey {
-  smt_type: Uint16,
-  sub_type: Byte6,
-  reserved: Byte24,
-}
-table SocialValue {
-  recovery_mode: byte,
-  must: byte,
-  total: byte,
-  signers: LockScriptVec,
-}
-vector SocialKeyVec <SocialKey>;
-vector SocialValueVec <SocialValue>;
-table SocialEntry {
-  keys: SocialKeyVec,
-  values: SocialValueVec,
-}
-option SocialEntryOpt (SocialEntry);
-
 // Extension
 table ExtensionLeaves {
   keys: ExtensionVec,
@@ -347,6 +304,27 @@ table ExtensionLeaves {
 
 table ExtensionEntries {
   leaves: ExtensionLeaves,
-  subkey: SubKeyEntryOpt,
-  social: SocialEntryOpt,
+  sub_type: Byte6,
+  raw_data: Bytes,
+}
+
+
+// Subkey
+struct SubKey {
+  smt_type: Uint16, 
+  sub_type: Byte6,  
+  ext_data: Uint32, 
+  reserved: Byte20,
+}
+struct SubValue {
+  alg_index: Uint16,   
+  pubkey_hash: Byte20,
+  reserved: Byte9,
+  padding: byte,     
+}
+vector SubKeyVec <SubKey>;
+vector SubValueVec<SubValue>;
+table SubKeyEntries {
+  keys: SubKeyVec,
+  values: SubValueVec,
 }
