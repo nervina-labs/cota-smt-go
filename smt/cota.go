@@ -11636,3 +11636,1098 @@ func (s *SubKeyEntries) AsBuilder() SubKeyEntriesBuilder {
 	ret := NewSubKeyEntriesBuilder().Keys(*s.Keys()).Values(*s.Values())
 	return *ret
 }
+
+type SocialKeyBuilder struct {
+	smt_type Uint16
+	sub_type Byte6
+	reserved Byte24
+}
+
+func (s *SocialKeyBuilder) Build() SocialKey {
+	b := new(bytes.Buffer)
+	b.Write(s.smt_type.AsSlice())
+	b.Write(s.sub_type.AsSlice())
+	b.Write(s.reserved.AsSlice())
+	return SocialKey{inner: b.Bytes()}
+}
+
+func (s *SocialKeyBuilder) SmtType(v Uint16) *SocialKeyBuilder {
+	s.smt_type = v
+	return s
+}
+
+func (s *SocialKeyBuilder) SubType(v Byte6) *SocialKeyBuilder {
+	s.sub_type = v
+	return s
+}
+
+func (s *SocialKeyBuilder) Reserved(v Byte24) *SocialKeyBuilder {
+	s.reserved = v
+	return s
+}
+
+func NewSocialKeyBuilder() *SocialKeyBuilder {
+	return &SocialKeyBuilder{smt_type: Uint16Default(), sub_type: Byte6Default(), reserved: Byte24Default()}
+}
+
+type SocialKey struct {
+	inner []byte
+}
+
+func SocialKeyFromSliceUnchecked(slice []byte) *SocialKey {
+	return &SocialKey{inner: slice}
+}
+func (s *SocialKey) AsSlice() []byte {
+	return s.inner
+}
+
+func SocialKeyDefault() SocialKey {
+	return *SocialKeyFromSliceUnchecked([]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
+}
+
+func SocialKeyFromSlice(slice []byte, _compatible bool) (*SocialKey, error) {
+	sliceLen := len(slice)
+	if sliceLen != 32 {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "SocialKey", strconv.Itoa(int(sliceLen)), "!=", strconv.Itoa(32)}, " ")
+		return nil, errors.New(errMsg)
+	}
+	return &SocialKey{inner: slice}, nil
+}
+
+func (s *SocialKey) SmtType() *Uint16 {
+	ret := Uint16FromSliceUnchecked(s.inner[0:2])
+	return ret
+}
+
+func (s *SocialKey) SubType() *Byte6 {
+	ret := Byte6FromSliceUnchecked(s.inner[2:8])
+	return ret
+}
+
+func (s *SocialKey) Reserved() *Byte24 {
+	ret := Byte24FromSliceUnchecked(s.inner[8:32])
+	return ret
+}
+
+func (s *SocialKey) AsBuilder() SocialKeyBuilder {
+	ret := NewSocialKeyBuilder().SmtType(*s.SmtType()).SubType(*s.SubType()).Reserved(*s.Reserved())
+	return *ret
+}
+
+type SocialValueBuilder struct {
+	recovery_mode Byte
+	must          Byte
+	total         Byte
+	signers       LockScriptVec
+}
+
+func (s *SocialValueBuilder) Build() SocialValue {
+	b := new(bytes.Buffer)
+
+	totalSize := HeaderSizeUint * (4 + 1)
+	offsets := make([]uint32, 0, 4)
+
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.recovery_mode.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.must.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.total.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.signers.AsSlice()))
+
+	b.Write(packNumber(Number(totalSize)))
+
+	for i := 0; i < len(offsets); i++ {
+		b.Write(packNumber(Number(offsets[i])))
+	}
+
+	b.Write(s.recovery_mode.AsSlice())
+	b.Write(s.must.AsSlice())
+	b.Write(s.total.AsSlice())
+	b.Write(s.signers.AsSlice())
+	return SocialValue{inner: b.Bytes()}
+}
+
+func (s *SocialValueBuilder) RecoveryMode(v Byte) *SocialValueBuilder {
+	s.recovery_mode = v
+	return s
+}
+
+func (s *SocialValueBuilder) Must(v Byte) *SocialValueBuilder {
+	s.must = v
+	return s
+}
+
+func (s *SocialValueBuilder) Total(v Byte) *SocialValueBuilder {
+	s.total = v
+	return s
+}
+
+func (s *SocialValueBuilder) Signers(v LockScriptVec) *SocialValueBuilder {
+	s.signers = v
+	return s
+}
+
+func NewSocialValueBuilder() *SocialValueBuilder {
+	return &SocialValueBuilder{recovery_mode: ByteDefault(), must: ByteDefault(), total: ByteDefault(), signers: LockScriptVecDefault()}
+}
+
+type SocialValue struct {
+	inner []byte
+}
+
+func SocialValueFromSliceUnchecked(slice []byte) *SocialValue {
+	return &SocialValue{inner: slice}
+}
+func (s *SocialValue) AsSlice() []byte {
+	return s.inner
+}
+
+func SocialValueDefault() SocialValue {
+	return *SocialValueFromSliceUnchecked([]byte{27, 0, 0, 0, 20, 0, 0, 0, 21, 0, 0, 0, 22, 0, 0, 0, 23, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0})
+}
+
+func SocialValueFromSlice(slice []byte, compatible bool) (*SocialValue, error) {
+	sliceLen := len(slice)
+	if uint32(sliceLen) < HeaderSizeUint {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "SocialValue", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	totalSize := unpackNumber(slice)
+	if Number(sliceLen) != totalSize {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "SocialValue", strconv.Itoa(int(sliceLen)), "!=", strconv.Itoa(int(totalSize))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if uint32(sliceLen) == HeaderSizeUint && 4 == 0 {
+		return &SocialValue{inner: slice}, nil
+	}
+
+	if uint32(sliceLen) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "SocialValue", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	offsetFirst := unpackNumber(slice[HeaderSizeUint:])
+	if uint32(offsetFirst)%HeaderSizeUint != 0 || uint32(offsetFirst) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"OffsetsNotMatch", "SocialValue", strconv.Itoa(int(offsetFirst % 4)), "!= 0", strconv.Itoa(int(offsetFirst)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if sliceLen < int(offsetFirst) {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "SocialValue", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(offsetFirst))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	fieldCount := uint32(offsetFirst)/HeaderSizeUint - 1
+	if fieldCount < 4 {
+		return nil, errors.New("FieldCountNotMatch")
+	} else if !compatible && fieldCount > 4 {
+		return nil, errors.New("FieldCountNotMatch")
+	}
+
+	offsets := make([]uint32, fieldCount)
+
+	for i := 0; i < int(fieldCount); i++ {
+		offsets[i] = uint32(unpackNumber(slice[HeaderSizeUint:][int(HeaderSizeUint)*i:]))
+	}
+	offsets = append(offsets, uint32(totalSize))
+
+	for i := 0; i < len(offsets); i++ {
+		if i&1 != 0 && offsets[i-1] > offsets[i] {
+			return nil, errors.New("OffsetsNotMatch")
+		}
+	}
+
+	var err error
+
+	_, err = ByteFromSlice(slice[offsets[0]:offsets[1]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = ByteFromSlice(slice[offsets[1]:offsets[2]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = ByteFromSlice(slice[offsets[2]:offsets[3]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = LockScriptVecFromSlice(slice[offsets[3]:offsets[4]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	return &SocialValue{inner: slice}, nil
+}
+
+func (s *SocialValue) TotalSize() uint {
+	return uint(unpackNumber(s.inner))
+}
+func (s *SocialValue) FieldCount() uint {
+	var number uint = 0
+	if uint32(s.TotalSize()) == HeaderSizeUint {
+		return number
+	}
+	number = uint(unpackNumber(s.inner[HeaderSizeUint:]))/4 - 1
+	return number
+}
+func (s *SocialValue) Len() uint {
+	return s.FieldCount()
+}
+func (s *SocialValue) IsEmpty() bool {
+	return s.Len() == 0
+}
+func (s *SocialValue) CountExtraFields() uint {
+	return s.FieldCount() - 4
+}
+
+func (s *SocialValue) HasExtraFields() bool {
+	return 4 != s.FieldCount()
+}
+
+func (s *SocialValue) RecoveryMode() *Byte {
+	start := unpackNumber(s.inner[4:])
+	end := unpackNumber(s.inner[8:])
+	return ByteFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *SocialValue) Must() *Byte {
+	start := unpackNumber(s.inner[8:])
+	end := unpackNumber(s.inner[12:])
+	return ByteFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *SocialValue) Total() *Byte {
+	start := unpackNumber(s.inner[12:])
+	end := unpackNumber(s.inner[16:])
+	return ByteFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *SocialValue) Signers() *LockScriptVec {
+	var ret *LockScriptVec
+	start := unpackNumber(s.inner[16:])
+	if s.HasExtraFields() {
+		end := unpackNumber(s.inner[20:])
+		ret = LockScriptVecFromSliceUnchecked(s.inner[start:end])
+	} else {
+		ret = LockScriptVecFromSliceUnchecked(s.inner[start:])
+	}
+	return ret
+}
+
+func (s *SocialValue) AsBuilder() SocialValueBuilder {
+	ret := NewSocialValueBuilder().RecoveryMode(*s.RecoveryMode()).Must(*s.Must()).Total(*s.Total()).Signers(*s.Signers())
+	return *ret
+}
+
+type SocialEntryBuilder struct {
+	key   SocialKey
+	value SocialValue
+}
+
+func (s *SocialEntryBuilder) Build() SocialEntry {
+	b := new(bytes.Buffer)
+
+	totalSize := HeaderSizeUint * (2 + 1)
+	offsets := make([]uint32, 0, 2)
+
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.key.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.value.AsSlice()))
+
+	b.Write(packNumber(Number(totalSize)))
+
+	for i := 0; i < len(offsets); i++ {
+		b.Write(packNumber(Number(offsets[i])))
+	}
+
+	b.Write(s.key.AsSlice())
+	b.Write(s.value.AsSlice())
+	return SocialEntry{inner: b.Bytes()}
+}
+
+func (s *SocialEntryBuilder) Key(v SocialKey) *SocialEntryBuilder {
+	s.key = v
+	return s
+}
+
+func (s *SocialEntryBuilder) Value(v SocialValue) *SocialEntryBuilder {
+	s.value = v
+	return s
+}
+
+func NewSocialEntryBuilder() *SocialEntryBuilder {
+	return &SocialEntryBuilder{key: SocialKeyDefault(), value: SocialValueDefault()}
+}
+
+type SocialEntry struct {
+	inner []byte
+}
+
+func SocialEntryFromSliceUnchecked(slice []byte) *SocialEntry {
+	return &SocialEntry{inner: slice}
+}
+func (s *SocialEntry) AsSlice() []byte {
+	return s.inner
+}
+
+func SocialEntryDefault() SocialEntry {
+	return *SocialEntryFromSliceUnchecked([]byte{71, 0, 0, 0, 12, 0, 0, 0, 44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 27, 0, 0, 0, 20, 0, 0, 0, 21, 0, 0, 0, 22, 0, 0, 0, 23, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0})
+}
+
+func SocialEntryFromSlice(slice []byte, compatible bool) (*SocialEntry, error) {
+	sliceLen := len(slice)
+	if uint32(sliceLen) < HeaderSizeUint {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "SocialEntry", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	totalSize := unpackNumber(slice)
+	if Number(sliceLen) != totalSize {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "SocialEntry", strconv.Itoa(int(sliceLen)), "!=", strconv.Itoa(int(totalSize))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if uint32(sliceLen) == HeaderSizeUint && 2 == 0 {
+		return &SocialEntry{inner: slice}, nil
+	}
+
+	if uint32(sliceLen) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "SocialEntry", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	offsetFirst := unpackNumber(slice[HeaderSizeUint:])
+	if uint32(offsetFirst)%HeaderSizeUint != 0 || uint32(offsetFirst) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"OffsetsNotMatch", "SocialEntry", strconv.Itoa(int(offsetFirst % 4)), "!= 0", strconv.Itoa(int(offsetFirst)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if sliceLen < int(offsetFirst) {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "SocialEntry", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(offsetFirst))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	fieldCount := uint32(offsetFirst)/HeaderSizeUint - 1
+	if fieldCount < 2 {
+		return nil, errors.New("FieldCountNotMatch")
+	} else if !compatible && fieldCount > 2 {
+		return nil, errors.New("FieldCountNotMatch")
+	}
+
+	offsets := make([]uint32, fieldCount)
+
+	for i := 0; i < int(fieldCount); i++ {
+		offsets[i] = uint32(unpackNumber(slice[HeaderSizeUint:][int(HeaderSizeUint)*i:]))
+	}
+	offsets = append(offsets, uint32(totalSize))
+
+	for i := 0; i < len(offsets); i++ {
+		if i&1 != 0 && offsets[i-1] > offsets[i] {
+			return nil, errors.New("OffsetsNotMatch")
+		}
+	}
+
+	var err error
+
+	_, err = SocialKeyFromSlice(slice[offsets[0]:offsets[1]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = SocialValueFromSlice(slice[offsets[1]:offsets[2]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	return &SocialEntry{inner: slice}, nil
+}
+
+func (s *SocialEntry) TotalSize() uint {
+	return uint(unpackNumber(s.inner))
+}
+func (s *SocialEntry) FieldCount() uint {
+	var number uint = 0
+	if uint32(s.TotalSize()) == HeaderSizeUint {
+		return number
+	}
+	number = uint(unpackNumber(s.inner[HeaderSizeUint:]))/4 - 1
+	return number
+}
+func (s *SocialEntry) Len() uint {
+	return s.FieldCount()
+}
+func (s *SocialEntry) IsEmpty() bool {
+	return s.Len() == 0
+}
+func (s *SocialEntry) CountExtraFields() uint {
+	return s.FieldCount() - 2
+}
+
+func (s *SocialEntry) HasExtraFields() bool {
+	return 2 != s.FieldCount()
+}
+
+func (s *SocialEntry) Key() *SocialKey {
+	start := unpackNumber(s.inner[4:])
+	end := unpackNumber(s.inner[8:])
+	return SocialKeyFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *SocialEntry) Value() *SocialValue {
+	var ret *SocialValue
+	start := unpackNumber(s.inner[8:])
+	if s.HasExtraFields() {
+		end := unpackNumber(s.inner[12:])
+		ret = SocialValueFromSliceUnchecked(s.inner[start:end])
+	} else {
+		ret = SocialValueFromSliceUnchecked(s.inner[start:])
+	}
+	return ret
+}
+
+func (s *SocialEntry) AsBuilder() SocialEntryBuilder {
+	ret := NewSocialEntryBuilder().Key(*s.Key()).Value(*s.Value())
+	return *ret
+}
+
+type FriendPubkeyBuilder struct {
+	unlock_mode  Byte
+	alg_index    Uint16
+	pubkey       Bytes
+	signature    Bytes
+	ext_data     Uint32
+	subkey_proof Bytes
+}
+
+func (s *FriendPubkeyBuilder) Build() FriendPubkey {
+	b := new(bytes.Buffer)
+
+	totalSize := HeaderSizeUint * (6 + 1)
+	offsets := make([]uint32, 0, 6)
+
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.unlock_mode.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.alg_index.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.pubkey.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.signature.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.ext_data.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.subkey_proof.AsSlice()))
+
+	b.Write(packNumber(Number(totalSize)))
+
+	for i := 0; i < len(offsets); i++ {
+		b.Write(packNumber(Number(offsets[i])))
+	}
+
+	b.Write(s.unlock_mode.AsSlice())
+	b.Write(s.alg_index.AsSlice())
+	b.Write(s.pubkey.AsSlice())
+	b.Write(s.signature.AsSlice())
+	b.Write(s.ext_data.AsSlice())
+	b.Write(s.subkey_proof.AsSlice())
+	return FriendPubkey{inner: b.Bytes()}
+}
+
+func (s *FriendPubkeyBuilder) UnlockMode(v Byte) *FriendPubkeyBuilder {
+	s.unlock_mode = v
+	return s
+}
+
+func (s *FriendPubkeyBuilder) AlgIndex(v Uint16) *FriendPubkeyBuilder {
+	s.alg_index = v
+	return s
+}
+
+func (s *FriendPubkeyBuilder) Pubkey(v Bytes) *FriendPubkeyBuilder {
+	s.pubkey = v
+	return s
+}
+
+func (s *FriendPubkeyBuilder) Signature(v Bytes) *FriendPubkeyBuilder {
+	s.signature = v
+	return s
+}
+
+func (s *FriendPubkeyBuilder) ExtData(v Uint32) *FriendPubkeyBuilder {
+	s.ext_data = v
+	return s
+}
+
+func (s *FriendPubkeyBuilder) SubkeyProof(v Bytes) *FriendPubkeyBuilder {
+	s.subkey_proof = v
+	return s
+}
+
+func NewFriendPubkeyBuilder() *FriendPubkeyBuilder {
+	return &FriendPubkeyBuilder{unlock_mode: ByteDefault(), alg_index: Uint16Default(), pubkey: BytesDefault(), signature: BytesDefault(), ext_data: Uint32Default(), subkey_proof: BytesDefault()}
+}
+
+type FriendPubkey struct {
+	inner []byte
+}
+
+func FriendPubkeyFromSliceUnchecked(slice []byte) *FriendPubkey {
+	return &FriendPubkey{inner: slice}
+}
+func (s *FriendPubkey) AsSlice() []byte {
+	return s.inner
+}
+
+func FriendPubkeyDefault() FriendPubkey {
+	return *FriendPubkeyFromSliceUnchecked([]byte{47, 0, 0, 0, 28, 0, 0, 0, 29, 0, 0, 0, 31, 0, 0, 0, 35, 0, 0, 0, 39, 0, 0, 0, 43, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
+}
+
+func FriendPubkeyFromSlice(slice []byte, compatible bool) (*FriendPubkey, error) {
+	sliceLen := len(slice)
+	if uint32(sliceLen) < HeaderSizeUint {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "FriendPubkey", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	totalSize := unpackNumber(slice)
+	if Number(sliceLen) != totalSize {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "FriendPubkey", strconv.Itoa(int(sliceLen)), "!=", strconv.Itoa(int(totalSize))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if uint32(sliceLen) == HeaderSizeUint && 6 == 0 {
+		return &FriendPubkey{inner: slice}, nil
+	}
+
+	if uint32(sliceLen) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "FriendPubkey", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	offsetFirst := unpackNumber(slice[HeaderSizeUint:])
+	if uint32(offsetFirst)%HeaderSizeUint != 0 || uint32(offsetFirst) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"OffsetsNotMatch", "FriendPubkey", strconv.Itoa(int(offsetFirst % 4)), "!= 0", strconv.Itoa(int(offsetFirst)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if sliceLen < int(offsetFirst) {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "FriendPubkey", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(offsetFirst))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	fieldCount := uint32(offsetFirst)/HeaderSizeUint - 1
+	if fieldCount < 6 {
+		return nil, errors.New("FieldCountNotMatch")
+	} else if !compatible && fieldCount > 6 {
+		return nil, errors.New("FieldCountNotMatch")
+	}
+
+	offsets := make([]uint32, fieldCount)
+
+	for i := 0; i < int(fieldCount); i++ {
+		offsets[i] = uint32(unpackNumber(slice[HeaderSizeUint:][int(HeaderSizeUint)*i:]))
+	}
+	offsets = append(offsets, uint32(totalSize))
+
+	for i := 0; i < len(offsets); i++ {
+		if i&1 != 0 && offsets[i-1] > offsets[i] {
+			return nil, errors.New("OffsetsNotMatch")
+		}
+	}
+
+	var err error
+
+	_, err = ByteFromSlice(slice[offsets[0]:offsets[1]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = Uint16FromSlice(slice[offsets[1]:offsets[2]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[2]:offsets[3]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[3]:offsets[4]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = Uint32FromSlice(slice[offsets[4]:offsets[5]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[5]:offsets[6]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	return &FriendPubkey{inner: slice}, nil
+}
+
+func (s *FriendPubkey) TotalSize() uint {
+	return uint(unpackNumber(s.inner))
+}
+func (s *FriendPubkey) FieldCount() uint {
+	var number uint = 0
+	if uint32(s.TotalSize()) == HeaderSizeUint {
+		return number
+	}
+	number = uint(unpackNumber(s.inner[HeaderSizeUint:]))/4 - 1
+	return number
+}
+func (s *FriendPubkey) Len() uint {
+	return s.FieldCount()
+}
+func (s *FriendPubkey) IsEmpty() bool {
+	return s.Len() == 0
+}
+func (s *FriendPubkey) CountExtraFields() uint {
+	return s.FieldCount() - 6
+}
+
+func (s *FriendPubkey) HasExtraFields() bool {
+	return 6 != s.FieldCount()
+}
+
+func (s *FriendPubkey) UnlockMode() *Byte {
+	start := unpackNumber(s.inner[4:])
+	end := unpackNumber(s.inner[8:])
+	return ByteFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *FriendPubkey) AlgIndex() *Uint16 {
+	start := unpackNumber(s.inner[8:])
+	end := unpackNumber(s.inner[12:])
+	return Uint16FromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *FriendPubkey) Pubkey() *Bytes {
+	start := unpackNumber(s.inner[12:])
+	end := unpackNumber(s.inner[16:])
+	return BytesFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *FriendPubkey) Signature() *Bytes {
+	start := unpackNumber(s.inner[16:])
+	end := unpackNumber(s.inner[20:])
+	return BytesFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *FriendPubkey) ExtData() *Uint32 {
+	start := unpackNumber(s.inner[20:])
+	end := unpackNumber(s.inner[24:])
+	return Uint32FromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *FriendPubkey) SubkeyProof() *Bytes {
+	var ret *Bytes
+	start := unpackNumber(s.inner[24:])
+	if s.HasExtraFields() {
+		end := unpackNumber(s.inner[28:])
+		ret = BytesFromSliceUnchecked(s.inner[start:end])
+	} else {
+		ret = BytesFromSliceUnchecked(s.inner[start:])
+	}
+	return ret
+}
+
+func (s *FriendPubkey) AsBuilder() FriendPubkeyBuilder {
+	ret := NewFriendPubkeyBuilder().UnlockMode(*s.UnlockMode()).AlgIndex(*s.AlgIndex()).Pubkey(*s.Pubkey()).Signature(*s.Signature()).ExtData(*s.ExtData()).SubkeyProof(*s.SubkeyProof())
+	return *ret
+}
+
+type FriendPubkeyVecBuilder struct {
+	inner []FriendPubkey
+}
+
+func (s *FriendPubkeyVecBuilder) Build() FriendPubkeyVec {
+	itemCount := len(s.inner)
+
+	b := new(bytes.Buffer)
+
+	// Empty dyn vector, just return size's bytes
+	if itemCount == 0 {
+		b.Write(packNumber(Number(HeaderSizeUint)))
+		return FriendPubkeyVec{inner: b.Bytes()}
+	}
+
+	// Calculate first offset then loop for rest items offsets
+	totalSize := HeaderSizeUint * uint32(itemCount+1)
+	offsets := make([]uint32, 0, itemCount)
+	offsets = append(offsets, totalSize)
+	for i := 1; i < itemCount; i++ {
+		totalSize += uint32(len(s.inner[i-1].AsSlice()))
+		offsets = append(offsets, offsets[i-1]+uint32(len(s.inner[i-1].AsSlice())))
+	}
+	totalSize += uint32(len(s.inner[itemCount-1].AsSlice()))
+
+	b.Write(packNumber(Number(totalSize)))
+
+	for i := 0; i < itemCount; i++ {
+		b.Write(packNumber(Number(offsets[i])))
+	}
+
+	for i := 0; i < itemCount; i++ {
+		b.Write(s.inner[i].AsSlice())
+	}
+
+	return FriendPubkeyVec{inner: b.Bytes()}
+}
+
+func (s *FriendPubkeyVecBuilder) Set(v []FriendPubkey) *FriendPubkeyVecBuilder {
+	s.inner = v
+	return s
+}
+func (s *FriendPubkeyVecBuilder) Push(v FriendPubkey) *FriendPubkeyVecBuilder {
+	s.inner = append(s.inner, v)
+	return s
+}
+func (s *FriendPubkeyVecBuilder) Extend(iter []FriendPubkey) *FriendPubkeyVecBuilder {
+	for i := 0; i < len(iter); i++ {
+		s.inner = append(s.inner, iter[i])
+	}
+	return s
+}
+func (s *FriendPubkeyVecBuilder) Replace(index uint, v FriendPubkey) *FriendPubkey {
+	if uint(len(s.inner)) > index {
+		a := s.inner[index]
+		s.inner[index] = v
+		return &a
+	}
+	return nil
+}
+
+func NewFriendPubkeyVecBuilder() *FriendPubkeyVecBuilder {
+	return &FriendPubkeyVecBuilder{[]FriendPubkey{}}
+}
+
+type FriendPubkeyVec struct {
+	inner []byte
+}
+
+func FriendPubkeyVecFromSliceUnchecked(slice []byte) *FriendPubkeyVec {
+	return &FriendPubkeyVec{inner: slice}
+}
+func (s *FriendPubkeyVec) AsSlice() []byte {
+	return s.inner
+}
+
+func FriendPubkeyVecDefault() FriendPubkeyVec {
+	return *FriendPubkeyVecFromSliceUnchecked([]byte{4, 0, 0, 0})
+}
+
+func FriendPubkeyVecFromSlice(slice []byte, compatible bool) (*FriendPubkeyVec, error) {
+	sliceLen := len(slice)
+
+	if uint32(sliceLen) < HeaderSizeUint {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "FriendPubkeyVec", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	totalSize := unpackNumber(slice)
+	if Number(sliceLen) != totalSize {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "FriendPubkeyVec", strconv.Itoa(int(sliceLen)), "!=", strconv.Itoa(int(totalSize))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if uint32(sliceLen) == HeaderSizeUint {
+		return &FriendPubkeyVec{inner: slice}, nil
+	}
+
+	if uint32(sliceLen) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "FriendPubkeyVec", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	offsetFirst := unpackNumber(slice[HeaderSizeUint:])
+	if uint32(offsetFirst)%HeaderSizeUint != 0 || uint32(offsetFirst) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"OffsetsNotMatch", "FriendPubkeyVec", strconv.Itoa(int(offsetFirst % 4)), "!= 0", strconv.Itoa(int(offsetFirst)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if sliceLen < int(offsetFirst) {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "FriendPubkeyVec", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(offsetFirst))}, " ")
+		return nil, errors.New(errMsg)
+	}
+	itemCount := uint32(offsetFirst)/HeaderSizeUint - 1
+
+	offsets := make([]uint32, itemCount)
+
+	for i := 0; i < int(itemCount); i++ {
+		offsets[i] = uint32(unpackNumber(slice[HeaderSizeUint:][int(HeaderSizeUint)*i:]))
+	}
+
+	offsets = append(offsets, uint32(totalSize))
+
+	for i := 0; i < len(offsets); i++ {
+		if i&1 != 0 && offsets[i-1] > offsets[i] {
+			errMsg := strings.Join([]string{"OffsetsNotMatch", "FriendPubkeyVec"}, " ")
+			return nil, errors.New(errMsg)
+		}
+	}
+
+	for i := 0; i < len(offsets); i++ {
+		if i&1 != 0 {
+			start := offsets[i-1]
+			end := offsets[i]
+			_, err := FriendPubkeyFromSlice(slice[start:end], compatible)
+
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	return &FriendPubkeyVec{inner: slice}, nil
+}
+
+func (s *FriendPubkeyVec) TotalSize() uint {
+	return uint(unpackNumber(s.inner))
+}
+func (s *FriendPubkeyVec) ItemCount() uint {
+	var number uint = 0
+	if uint32(s.TotalSize()) == HeaderSizeUint {
+		return number
+	}
+	number = uint(unpackNumber(s.inner[HeaderSizeUint:]))/4 - 1
+	return number
+}
+func (s *FriendPubkeyVec) Len() uint {
+	return s.ItemCount()
+}
+func (s *FriendPubkeyVec) IsEmpty() bool {
+	return s.Len() == 0
+}
+
+// if *FriendPubkey is nil, index is out of bounds
+func (s *FriendPubkeyVec) Get(index uint) *FriendPubkey {
+	var b *FriendPubkey
+	if index < s.Len() {
+		start_index := uint(HeaderSizeUint) * (1 + index)
+		start := unpackNumber(s.inner[start_index:])
+
+		if index == s.Len()-1 {
+			b = FriendPubkeyFromSliceUnchecked(s.inner[start:])
+		} else {
+			end_index := start_index + uint(HeaderSizeUint)
+			end := unpackNumber(s.inner[end_index:])
+			b = FriendPubkeyFromSliceUnchecked(s.inner[start:end])
+		}
+	}
+	return b
+}
+
+func (s *FriendPubkeyVec) AsBuilder() FriendPubkeyVecBuilder {
+	size := s.ItemCount()
+	t := NewFriendPubkeyVecBuilder()
+	for i := uint(0); i < size; i++ {
+		t.Push(*s.Get(i))
+	}
+	return *t
+}
+
+type SocialUnlockEntriesBuilder struct {
+	social_value   SocialValue
+	social_proof   Bytes
+	social_friends FriendPubkeyVec
+}
+
+func (s *SocialUnlockEntriesBuilder) Build() SocialUnlockEntries {
+	b := new(bytes.Buffer)
+
+	totalSize := HeaderSizeUint * (3 + 1)
+	offsets := make([]uint32, 0, 3)
+
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.social_value.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.social_proof.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.social_friends.AsSlice()))
+
+	b.Write(packNumber(Number(totalSize)))
+
+	for i := 0; i < len(offsets); i++ {
+		b.Write(packNumber(Number(offsets[i])))
+	}
+
+	b.Write(s.social_value.AsSlice())
+	b.Write(s.social_proof.AsSlice())
+	b.Write(s.social_friends.AsSlice())
+	return SocialUnlockEntries{inner: b.Bytes()}
+}
+
+func (s *SocialUnlockEntriesBuilder) SocialValue(v SocialValue) *SocialUnlockEntriesBuilder {
+	s.social_value = v
+	return s
+}
+
+func (s *SocialUnlockEntriesBuilder) SocialProof(v Bytes) *SocialUnlockEntriesBuilder {
+	s.social_proof = v
+	return s
+}
+
+func (s *SocialUnlockEntriesBuilder) SocialFriends(v FriendPubkeyVec) *SocialUnlockEntriesBuilder {
+	s.social_friends = v
+	return s
+}
+
+func NewSocialUnlockEntriesBuilder() *SocialUnlockEntriesBuilder {
+	return &SocialUnlockEntriesBuilder{social_value: SocialValueDefault(), social_proof: BytesDefault(), social_friends: FriendPubkeyVecDefault()}
+}
+
+type SocialUnlockEntries struct {
+	inner []byte
+}
+
+func SocialUnlockEntriesFromSliceUnchecked(slice []byte) *SocialUnlockEntries {
+	return &SocialUnlockEntries{inner: slice}
+}
+func (s *SocialUnlockEntries) AsSlice() []byte {
+	return s.inner
+}
+
+func SocialUnlockEntriesDefault() SocialUnlockEntries {
+	return *SocialUnlockEntriesFromSliceUnchecked([]byte{51, 0, 0, 0, 16, 0, 0, 0, 43, 0, 0, 0, 47, 0, 0, 0, 27, 0, 0, 0, 20, 0, 0, 0, 21, 0, 0, 0, 22, 0, 0, 0, 23, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0})
+}
+
+func SocialUnlockEntriesFromSlice(slice []byte, compatible bool) (*SocialUnlockEntries, error) {
+	sliceLen := len(slice)
+	if uint32(sliceLen) < HeaderSizeUint {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "SocialUnlockEntries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	totalSize := unpackNumber(slice)
+	if Number(sliceLen) != totalSize {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "SocialUnlockEntries", strconv.Itoa(int(sliceLen)), "!=", strconv.Itoa(int(totalSize))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if uint32(sliceLen) == HeaderSizeUint && 3 == 0 {
+		return &SocialUnlockEntries{inner: slice}, nil
+	}
+
+	if uint32(sliceLen) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "SocialUnlockEntries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	offsetFirst := unpackNumber(slice[HeaderSizeUint:])
+	if uint32(offsetFirst)%HeaderSizeUint != 0 || uint32(offsetFirst) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"OffsetsNotMatch", "SocialUnlockEntries", strconv.Itoa(int(offsetFirst % 4)), "!= 0", strconv.Itoa(int(offsetFirst)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if sliceLen < int(offsetFirst) {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "SocialUnlockEntries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(offsetFirst))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	fieldCount := uint32(offsetFirst)/HeaderSizeUint - 1
+	if fieldCount < 3 {
+		return nil, errors.New("FieldCountNotMatch")
+	} else if !compatible && fieldCount > 3 {
+		return nil, errors.New("FieldCountNotMatch")
+	}
+
+	offsets := make([]uint32, fieldCount)
+
+	for i := 0; i < int(fieldCount); i++ {
+		offsets[i] = uint32(unpackNumber(slice[HeaderSizeUint:][int(HeaderSizeUint)*i:]))
+	}
+	offsets = append(offsets, uint32(totalSize))
+
+	for i := 0; i < len(offsets); i++ {
+		if i&1 != 0 && offsets[i-1] > offsets[i] {
+			return nil, errors.New("OffsetsNotMatch")
+		}
+	}
+
+	var err error
+
+	_, err = SocialValueFromSlice(slice[offsets[0]:offsets[1]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[1]:offsets[2]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = FriendPubkeyVecFromSlice(slice[offsets[2]:offsets[3]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	return &SocialUnlockEntries{inner: slice}, nil
+}
+
+func (s *SocialUnlockEntries) TotalSize() uint {
+	return uint(unpackNumber(s.inner))
+}
+func (s *SocialUnlockEntries) FieldCount() uint {
+	var number uint = 0
+	if uint32(s.TotalSize()) == HeaderSizeUint {
+		return number
+	}
+	number = uint(unpackNumber(s.inner[HeaderSizeUint:]))/4 - 1
+	return number
+}
+func (s *SocialUnlockEntries) Len() uint {
+	return s.FieldCount()
+}
+func (s *SocialUnlockEntries) IsEmpty() bool {
+	return s.Len() == 0
+}
+func (s *SocialUnlockEntries) CountExtraFields() uint {
+	return s.FieldCount() - 3
+}
+
+func (s *SocialUnlockEntries) HasExtraFields() bool {
+	return 3 != s.FieldCount()
+}
+
+func (s *SocialUnlockEntries) SocialValue() *SocialValue {
+	start := unpackNumber(s.inner[4:])
+	end := unpackNumber(s.inner[8:])
+	return SocialValueFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *SocialUnlockEntries) SocialProof() *Bytes {
+	start := unpackNumber(s.inner[8:])
+	end := unpackNumber(s.inner[12:])
+	return BytesFromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *SocialUnlockEntries) SocialFriends() *FriendPubkeyVec {
+	var ret *FriendPubkeyVec
+	start := unpackNumber(s.inner[12:])
+	if s.HasExtraFields() {
+		end := unpackNumber(s.inner[16:])
+		ret = FriendPubkeyVecFromSliceUnchecked(s.inner[start:end])
+	} else {
+		ret = FriendPubkeyVecFromSliceUnchecked(s.inner[start:])
+	}
+	return ret
+}
+
+func (s *SocialUnlockEntries) AsBuilder() SocialUnlockEntriesBuilder {
+	ret := NewSocialUnlockEntriesBuilder().SocialValue(*s.SocialValue()).SocialProof(*s.SocialProof()).SocialFriends(*s.SocialFriends())
+	return *ret
+}

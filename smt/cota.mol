@@ -328,3 +328,39 @@ table SubKeyEntries {
   keys: SubKeyVec,
   values: SubValueVec,
 }
+
+
+// Social recovery 
+struct SocialKey {
+  smt_type: Uint16,  
+  sub_type: Byte6,   
+  reserved: Byte24,
+}
+table SocialValue {
+  recovery_mode: byte,   
+  must: byte,
+  total: byte,
+  signers: LockScriptVec,
+}
+table SocialEntry {
+  key: SocialKey,
+  value: SocialValue,
+}
+
+
+table FriendPubkey {
+  unlock_mode: byte,         
+  alg_index: Uint16,    
+  pubkey: Bytes,      
+	signature: Bytes,   
+
+  // only for subkey
+  ext_data: Uint32,   
+  subkey_proof: Bytes,
+}
+vector FriendPubkeyVec <FriendPubkey>;
+table SocialUnlockEntries {
+  social_value: SocialValue, 
+  social_proof: Bytes,     
+  social_friends: FriendPubkeyVec,
+}
