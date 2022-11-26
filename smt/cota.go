@@ -11637,6 +11637,198 @@ func (s *SubKeyEntries) AsBuilder() SubKeyEntriesBuilder {
 	return *ret
 }
 
+type SubKeyUnlockEntriesBuilder struct {
+	ext_data     Uint32
+	alg_index    Uint16
+	subkey_proof Bytes
+}
+
+func (s *SubKeyUnlockEntriesBuilder) Build() SubKeyUnlockEntries {
+	b := new(bytes.Buffer)
+
+	totalSize := HeaderSizeUint * (3 + 1)
+	offsets := make([]uint32, 0, 3)
+
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.ext_data.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.alg_index.AsSlice()))
+	offsets = append(offsets, totalSize)
+	totalSize += uint32(len(s.subkey_proof.AsSlice()))
+
+	b.Write(packNumber(Number(totalSize)))
+
+	for i := 0; i < len(offsets); i++ {
+		b.Write(packNumber(Number(offsets[i])))
+	}
+
+	b.Write(s.ext_data.AsSlice())
+	b.Write(s.alg_index.AsSlice())
+	b.Write(s.subkey_proof.AsSlice())
+	return SubKeyUnlockEntries{inner: b.Bytes()}
+}
+
+func (s *SubKeyUnlockEntriesBuilder) ExtData(v Uint32) *SubKeyUnlockEntriesBuilder {
+	s.ext_data = v
+	return s
+}
+
+func (s *SubKeyUnlockEntriesBuilder) AlgIndex(v Uint16) *SubKeyUnlockEntriesBuilder {
+	s.alg_index = v
+	return s
+}
+
+func (s *SubKeyUnlockEntriesBuilder) SubkeyProof(v Bytes) *SubKeyUnlockEntriesBuilder {
+	s.subkey_proof = v
+	return s
+}
+
+func NewSubKeyUnlockEntriesBuilder() *SubKeyUnlockEntriesBuilder {
+	return &SubKeyUnlockEntriesBuilder{ext_data: Uint32Default(), alg_index: Uint16Default(), subkey_proof: BytesDefault()}
+}
+
+type SubKeyUnlockEntries struct {
+	inner []byte
+}
+
+func SubKeyUnlockEntriesFromSliceUnchecked(slice []byte) *SubKeyUnlockEntries {
+	return &SubKeyUnlockEntries{inner: slice}
+}
+func (s *SubKeyUnlockEntries) AsSlice() []byte {
+	return s.inner
+}
+
+func SubKeyUnlockEntriesDefault() SubKeyUnlockEntries {
+	return *SubKeyUnlockEntriesFromSliceUnchecked([]byte{26, 0, 0, 0, 16, 0, 0, 0, 20, 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
+}
+
+func SubKeyUnlockEntriesFromSlice(slice []byte, compatible bool) (*SubKeyUnlockEntries, error) {
+	sliceLen := len(slice)
+	if uint32(sliceLen) < HeaderSizeUint {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "SubKeyUnlockEntries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	totalSize := unpackNumber(slice)
+	if Number(sliceLen) != totalSize {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "SubKeyUnlockEntries", strconv.Itoa(int(sliceLen)), "!=", strconv.Itoa(int(totalSize))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if uint32(sliceLen) == HeaderSizeUint && 3 == 0 {
+		return &SubKeyUnlockEntries{inner: slice}, nil
+	}
+
+	if uint32(sliceLen) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"TotalSizeNotMatch", "SubKeyUnlockEntries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	offsetFirst := unpackNumber(slice[HeaderSizeUint:])
+	if uint32(offsetFirst)%HeaderSizeUint != 0 || uint32(offsetFirst) < HeaderSizeUint*2 {
+		errMsg := strings.Join([]string{"OffsetsNotMatch", "SubKeyUnlockEntries", strconv.Itoa(int(offsetFirst % 4)), "!= 0", strconv.Itoa(int(offsetFirst)), "<", strconv.Itoa(int(HeaderSizeUint * 2))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	if sliceLen < int(offsetFirst) {
+		errMsg := strings.Join([]string{"HeaderIsBroken", "SubKeyUnlockEntries", strconv.Itoa(int(sliceLen)), "<", strconv.Itoa(int(offsetFirst))}, " ")
+		return nil, errors.New(errMsg)
+	}
+
+	fieldCount := uint32(offsetFirst)/HeaderSizeUint - 1
+	if fieldCount < 3 {
+		return nil, errors.New("FieldCountNotMatch")
+	} else if !compatible && fieldCount > 3 {
+		return nil, errors.New("FieldCountNotMatch")
+	}
+
+	offsets := make([]uint32, fieldCount)
+
+	for i := 0; i < int(fieldCount); i++ {
+		offsets[i] = uint32(unpackNumber(slice[HeaderSizeUint:][int(HeaderSizeUint)*i:]))
+	}
+	offsets = append(offsets, uint32(totalSize))
+
+	for i := 0; i < len(offsets); i++ {
+		if i&1 != 0 && offsets[i-1] > offsets[i] {
+			return nil, errors.New("OffsetsNotMatch")
+		}
+	}
+
+	var err error
+
+	_, err = Uint32FromSlice(slice[offsets[0]:offsets[1]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = Uint16FromSlice(slice[offsets[1]:offsets[2]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BytesFromSlice(slice[offsets[2]:offsets[3]], compatible)
+	if err != nil {
+		return nil, err
+	}
+
+	return &SubKeyUnlockEntries{inner: slice}, nil
+}
+
+func (s *SubKeyUnlockEntries) TotalSize() uint {
+	return uint(unpackNumber(s.inner))
+}
+func (s *SubKeyUnlockEntries) FieldCount() uint {
+	var number uint = 0
+	if uint32(s.TotalSize()) == HeaderSizeUint {
+		return number
+	}
+	number = uint(unpackNumber(s.inner[HeaderSizeUint:]))/4 - 1
+	return number
+}
+func (s *SubKeyUnlockEntries) Len() uint {
+	return s.FieldCount()
+}
+func (s *SubKeyUnlockEntries) IsEmpty() bool {
+	return s.Len() == 0
+}
+func (s *SubKeyUnlockEntries) CountExtraFields() uint {
+	return s.FieldCount() - 3
+}
+
+func (s *SubKeyUnlockEntries) HasExtraFields() bool {
+	return 3 != s.FieldCount()
+}
+
+func (s *SubKeyUnlockEntries) ExtData() *Uint32 {
+	start := unpackNumber(s.inner[4:])
+	end := unpackNumber(s.inner[8:])
+	return Uint32FromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *SubKeyUnlockEntries) AlgIndex() *Uint16 {
+	start := unpackNumber(s.inner[8:])
+	end := unpackNumber(s.inner[12:])
+	return Uint16FromSliceUnchecked(s.inner[start:end])
+}
+
+func (s *SubKeyUnlockEntries) SubkeyProof() *Bytes {
+	var ret *Bytes
+	start := unpackNumber(s.inner[12:])
+	if s.HasExtraFields() {
+		end := unpackNumber(s.inner[16:])
+		ret = BytesFromSliceUnchecked(s.inner[start:end])
+	} else {
+		ret = BytesFromSliceUnchecked(s.inner[start:])
+	}
+	return ret
+}
+
+func (s *SubKeyUnlockEntries) AsBuilder() SubKeyUnlockEntriesBuilder {
+	ret := NewSubKeyUnlockEntriesBuilder().ExtData(*s.ExtData()).AlgIndex(*s.AlgIndex()).SubkeyProof(*s.SubkeyProof())
+	return *ret
+}
+
 type SocialKeyBuilder struct {
 	smt_type Uint16
 	sub_type Byte6

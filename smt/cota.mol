@@ -329,6 +329,12 @@ table SubKeyEntries {
   values: SubValueVec,
 }
 
+table SubKeyUnlockEntries {
+  ext_data: Uint32,    
+  alg_index: Uint16,    
+  subkey_proof: Bytes, 
+}
+
 
 // Social recovery 
 struct SocialKey {
@@ -352,7 +358,7 @@ table FriendPubkey {
   unlock_mode: byte,         
   alg_index: Uint16,    
   pubkey: Bytes,      
-	signature: Bytes,   
+  signature: Bytes,   
 
   // only for subkey
   ext_data: Uint32,   
